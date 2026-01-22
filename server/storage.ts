@@ -1,38 +1,112 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import { 
+  users, events, registrations,
+  type User, type InsertUser,
+  type Event, type InsertEvent,
+  type Registration, type InsertRegistration
+} from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
+  // Users
+  getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+
+  // Events
+  getEvents(): Promise<Event[]>;
+  getEvent(id: number): Promise<Event | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  deleteEvent(id: number): Promise<void>;
+
+  // Registrations
+  getRegistrations(): Promise<(Registration & { event: Event, user: User })[]>;
+  getRegistration(id: number): Promise<Registration | undefined>;
+  getRegistrationsByUser(userId: number): Promise<(Registration & { event: Event })[]>;
+  createRegistration(registration: InsertRegistration): Promise<Registration>;
+  updateRegistration(id: number, updates: Partial<Registration>): Promise<Registration>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
-  }
-
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async getEvents(): Promise<Event[]> {
+    return await db.select().from(events).orderBy(events.date);
+  }
+
+  async getEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const [newEvent] = await db.insert(events).values(event).returning();
+    return newEvent;
+  }
+
+  async deleteEvent(id: number): Promise<void> {
+    await db.delete(events).where(eq(events.id, id));
+  }
+
+  async getRegistrations(): Promise<(Registration & { event: Event, user: User })[]> {
+    const results = await db.select().from(registrations)
+      .innerJoin(events, eq(registrations.eventId, events.id))
+      .innerJoin(users, eq(registrations.userId, users.id));
+    
+    return results.map(row => ({
+      ...row.registrations,
+      event: row.events,
+      user: row.users
+    }));
+  }
+
+  async getRegistration(id: number): Promise<Registration | undefined> {
+    const [registration] = await db.select().from(registrations).where(eq(registrations.id, id));
+    return registration;
+  }
+
+  async getRegistrationsByUser(userId: number): Promise<(Registration & { event: Event })[]> {
+    const results = await db.select().from(registrations)
+      .innerJoin(events, eq(registrations.eventId, events.id))
+      .where(eq(registrations.userId, userId));
+    
+    return results.map(row => ({
+      ...row.registrations,
+      event: row.events
+    }));
+  }
+
+  async createRegistration(registration: InsertRegistration): Promise<Registration> {
+    // Generate a random reference number
+    const referenceNumber = Math.random().toString(36).substring(2, 10).toUpperCase();
+    
+    const [newReg] = await db.insert(registrations).values({
+      ...registration,
+      referenceNumber,
+    }).returning();
+    return newReg;
+  }
+
+  async updateRegistration(id: number, updates: Partial<Registration>): Promise<Registration> {
+    const [updated] = await db.update(registrations)
+      .set(updates)
+      .where(eq(registrations.id, id))
+      .returning();
+    return updated;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
