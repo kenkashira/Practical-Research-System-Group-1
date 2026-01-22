@@ -10,17 +10,18 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+  username: z.string().regex(/^\d+$/, "LRN must be numbers only"),
   password: z.string().min(1, "Password is required"),
 });
 
 export default function AuthPage() {
   const { user, login, register, isLoggingIn, isRegistering } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
+  const [showPassword, setShowPassword] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -36,9 +37,18 @@ export default function AuthPage() {
       role: "student",
       email: "",
       contactNumber: "",
-      gradeSection: "",
+      grade: "",
+      section: "",
+      strand: "",
     },
   });
+
+  const onRegister = async (data: z.infer<typeof insertUserSchema>) => {
+    await register(data);
+    // Automatic login is handled by the hook if it updates state, 
+    // but the user wants to be moved to login area or gone.
+    // The redirect happens automatically because 'user' state changes.
+  };
 
   if (user) {
     return <Redirect href={user.role === "admin" ? "/admin" : "/dashboard"} />;
@@ -55,7 +65,7 @@ export default function AuthPage() {
           </div>
           <h1 className="font-display text-5xl font-bold leading-tight mb-6">
             Army's Angels <br />
-            <span className="text-secondary">Integrated School</span>
+            <span className="text-secondary uppercase">INTEGRATED SCHOOL</span>
           </h1>
           <p className="text-lg text-primary-foreground/80 max-w-md">
             Welcome to the official event portal. Register for upcoming events, submit requirements, and track your applications.
@@ -63,9 +73,9 @@ export default function AuthPage() {
         </div>
         
         <div className="relative z-10 flex gap-4 text-sm text-primary-foreground/60">
-          <span>© 2024 Army's Angels</span>
+          <span>© 2024 ARMY'S ANGELS</span>
           <span>•</span>
-          <span>Privacy Policy</span>
+          <span>PRIVACY POLICY</span>
         </div>
       </div>
 
@@ -79,19 +89,19 @@ export default function AuthPage() {
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-muted/50 p-1">
-              <TabsTrigger value="login" className="rounded-md font-medium text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
-                Login
+              <TabsTrigger value="login" className="rounded-md font-medium text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all uppercase">
+                LOGIN
               </TabsTrigger>
-              <TabsTrigger value="register" className="rounded-md font-medium text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all">
-                Register
+              <TabsTrigger value="register" className="rounded-md font-medium text-sm data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all uppercase">
+                REGISTER
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">
               <Card className="border-none shadow-xl">
                 <CardHeader>
-                  <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
-                  <CardDescription>Enter your Student ID / LRN to continue</CardDescription>
+                  <CardTitle className="font-display text-2xl uppercase">WELCOME BACK</CardTitle>
+                  <CardDescription>Enter your LRN to continue</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...loginForm}>
@@ -101,9 +111,9 @@ export default function AuthPage() {
                         name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Student ID / Username</FormLabel>
+                            <FormLabel className="uppercase">LRN</FormLabel>
                             <FormControl>
-                              <Input placeholder="12345678" {...field} className="bg-muted/30" />
+                              <Input placeholder="12345678" {...field} className="bg-muted/30" type="number" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -114,16 +124,27 @@ export default function AuthPage() {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel className="uppercase">PASSWORD</FormLabel>
                             <FormControl>
-                              <Input type="password" {...field} className="bg-muted/30" />
+                              <div className="relative">
+                                <Input type={showPassword ? "text" : "password"} {...field} className="bg-muted/30 pr-10" />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                >
+                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </Button>
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full py-6 font-semibold shadow-lg shadow-primary/20" disabled={isLoggingIn}>
-                        {isLoggingIn ? <Loader2 className="animate-spin" /> : "Sign In"}
+                      <Button type="submit" className="w-full py-6 font-semibold shadow-lg shadow-primary/20 uppercase" disabled={isLoggingIn}>
+                        {isLoggingIn ? <Loader2 className="animate-spin" /> : "SIGN IN"}
                       </Button>
                     </form>
                   </Form>
@@ -134,20 +155,20 @@ export default function AuthPage() {
             <TabsContent value="register">
               <Card className="border-none shadow-xl">
                 <CardHeader>
-                  <CardTitle className="font-display text-2xl">Create Account</CardTitle>
+                  <CardTitle className="font-display text-2xl uppercase">CREATE ACCOUNT</CardTitle>
                   <CardDescription>Enter your details to get started</CardDescription>
                 </CardHeader>
                 <CardContent>
                    <Form {...registerForm}>
-                    <form onSubmit={registerForm.handleSubmit((d) => register(d))} className="space-y-4">
+                    <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
                       <FormField
                         control={registerForm.control}
                         name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Student ID / Username</FormLabel>
+                            <FormLabel className="uppercase">LRN</FormLabel>
                             <FormControl>
-                              <Input placeholder="12345678" {...field} />
+                              <Input placeholder="12345678" {...field} type="number" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -158,9 +179,9 @@ export default function AuthPage() {
                         name="fullName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Full Name</FormLabel>
+                            <FormLabel className="uppercase">FULL NAME</FormLabel>
                             <FormControl>
-                              <Input placeholder="John Doe" {...field} />
+                              <Input placeholder="JOHN DOE" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -169,12 +190,12 @@ export default function AuthPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={registerForm.control}
-                            name="gradeSection"
+                            name="grade"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Grade/Section</FormLabel>
+                                <FormLabel className="uppercase">GRADE</FormLabel>
                                 <FormControl>
-                                <Input placeholder="10 - Rizal" {...field} />
+                                <Input placeholder="11" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -182,20 +203,57 @@ export default function AuthPage() {
                         />
                          <FormField
                             control={registerForm.control}
-                            name="password"
+                            name="section"
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel className="uppercase">SECTION</FormLabel>
                                 <FormControl>
-                                <Input type="password" {...field} />
+                                <Input placeholder="RIZAL" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                             )}
                         />
                       </div>
-                      <Button type="submit" className="w-full py-6 font-semibold shadow-lg shadow-primary/20" disabled={isRegistering}>
-                        {isRegistering ? <Loader2 className="animate-spin" /> : "Create Account"}
+                      <FormField
+                          control={registerForm.control}
+                          name="strand"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="uppercase">STRAND (OPTIONAL)</FormLabel>
+                              <FormControl>
+                              <Input placeholder="STEM" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <FormField
+                          control={registerForm.control}
+                          name="password"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormLabel className="uppercase">PASSWORD</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Input type={showPassword ? "text" : "password"} {...field} className="pr-10" />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                  >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                  </Button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <Button type="submit" className="w-full py-6 font-semibold shadow-lg shadow-primary/20 uppercase" disabled={isRegistering}>
+                        {isRegistering ? <Loader2 className="animate-spin" /> : "CREATE ACCOUNT"}
                       </Button>
                     </form>
                   </Form>

@@ -222,19 +222,23 @@ async function seedDatabase() {
       username: "admin",
       password: "admin123", // Plaintext for MVP/Lite
       role: "admin",
-      fullName: "System Administrator",
-      gradeSection: "N/A",
+      fullName: "SYSTEM ADMINISTRATOR",
+      grade: "N/A",
+      section: "N/A",
+      strand: "N/A",
       email: "admin@school.edu",
       contactNumber: "1234567890"
     });
     console.log("Seeded admin user");
 
     await storage.createUser({
-      username: "student1",
+      username: "12345678",
       password: "password",
       role: "student",
-      fullName: "John Doe",
-      gradeSection: "Grade 10 - A",
+      fullName: "JOHN DOE",
+      grade: "10",
+      section: "RIZAL",
+      strand: "N/A",
       email: "john@student.edu",
       contactNumber: "09123456789"
     });

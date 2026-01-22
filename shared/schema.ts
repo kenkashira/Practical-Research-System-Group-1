@@ -4,11 +4,13 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(), // Student ID or LRN
+  username: text("username").notNull().unique(), // LRN (Numbers only enforced in frontend)
   password: text("password").notNull(),
   role: text("role", { enum: ["student", "admin"] }).default("student").notNull(),
   fullName: text("full_name").notNull(),
-  gradeSection: text("grade_section"),
+  grade: text("grade"),
+  section: text("section"),
+  strand: text("strand"),
   email: text("email"),
   contactNumber: text("contact_number"),
 });
