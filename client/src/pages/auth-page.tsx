@@ -195,8 +195,8 @@ export default function AuthPage() {
                             <FormItem>
                                 <FormLabel className="uppercase">GRADE</FormLabel>
                                 <FormControl>
-                                <Input placeholder="11" {...field} />
-                                </FormControl>
+                              <Input placeholder="11" {...field} value={field.value || ""} />
+                            </FormControl>
                                 <FormMessage />
                             </FormItem>
                             )}
@@ -208,8 +208,8 @@ export default function AuthPage() {
                             <FormItem>
                                 <FormLabel className="uppercase">SECTION</FormLabel>
                                 <FormControl>
-                                <Input placeholder="RIZAL" {...field} />
-                                </FormControl>
+                              <Input placeholder="RIZAL" {...field} value={field.value || ""} />
+                            </FormControl>
                                 <FormMessage />
                             </FormItem>
                             )}
@@ -222,7 +222,7 @@ export default function AuthPage() {
                           <FormItem>
                               <FormLabel className="uppercase">STRAND (OPTIONAL)</FormLabel>
                               <FormControl>
-                              <Input placeholder="STEM" {...field} />
+                              <Input placeholder="STEM" {...field} value={field.value || ""} />
                               </FormControl>
                               <FormMessage />
                           </FormItem>

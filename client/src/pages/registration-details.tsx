@@ -18,6 +18,7 @@ export default function RegistrationDetailsPage() {
   if (!reg) return <div>Registration not found</div>;
 
   const isAdmin = user?.role === "admin";
+  const typedReg = reg as any; // Temporary fix for inferred types during transition
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -29,9 +30,9 @@ export default function RegistrationDetailsPage() {
       <div className="flex justify-between items-start">
          <div>
             <h1 className="text-2xl font-display font-bold">Registration Details</h1>
-            <p className="text-muted-foreground font-mono mt-1">Ref: {reg.referenceNumber}</p>
+            <p className="text-muted-foreground font-mono mt-1">Ref: {typedReg.referenceNumber}</p>
          </div>
-         <StatusBadge status={reg.status} />
+         <StatusBadge status={typedReg.status} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -42,15 +43,15 @@ export default function RegistrationDetailsPage() {
             <CardContent className="space-y-4">
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Event</label>
-                  <p className="font-medium">{reg.event?.title}</p>
+                  <p className="font-medium">{typedReg.event?.title}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Date</label>
-                  <p className="font-medium">{format(new Date(reg.event?.date), "MMMM d, yyyy h:mm a")}</p>
+                  <p className="font-medium">{format(new Date(typedReg.event?.date), "MMMM d, yyyy h:mm a")}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Venue</label>
-                  <p className="font-medium">{reg.event?.venue}</p>
+                  <p className="font-medium">{typedReg.event?.venue}</p>
                </div>
             </CardContent>
          </Card>
@@ -62,15 +63,15 @@ export default function RegistrationDetailsPage() {
             <CardContent className="space-y-4">
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Name</label>
-                  <p className="font-medium">{reg.user?.fullName}</p>
+                  <p className="font-medium">{typedReg.user?.fullName}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Grade / Section</label>
-                  <p className="font-medium">{reg.user?.gradeSection || "N/A"}</p>
+                  <p className="font-medium uppercase">{typedReg.user?.grade} - {typedReg.user?.section} {typedReg.user?.strand ? `(${typedReg.user?.strand})` : ""}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Contact</label>
-                  <p className="font-medium">{reg.user?.contactNumber || "N/A"}</p>
+                  <p className="font-medium">{typedReg.user?.contactNumber || "N/A"}</p>
                </div>
             </CardContent>
          </Card>
@@ -81,7 +82,7 @@ export default function RegistrationDetailsPage() {
             <CardTitle className="text-lg">Attached Documents</CardTitle>
          </CardHeader>
          <CardContent className="space-y-4">
-             {reg.parentConsentUrl ? (
+             {typedReg.parentConsentUrl ? (
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                    <div className="flex items-center">
                       <FileText className="w-5 h-5 text-primary mr-3" />
@@ -91,14 +92,14 @@ export default function RegistrationDetailsPage() {
                       </div>
                    </div>
                    <Button variant="outline" size="sm" asChild>
-                      <a href={reg.parentConsentUrl} target="_blank" rel="noopener noreferrer">View</a>
+                      <a href={typedReg.parentConsentUrl} target="_blank" rel="noopener noreferrer">View</a>
                    </Button>
                 </div>
              ) : (
                 <div className="text-sm text-muted-foreground italic p-4 border rounded-lg border-dashed text-center">No consent form attached</div>
              )}
 
-             {reg.paymentProofUrl ? (
+             {typedReg.paymentProofUrl ? (
                 <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                    <div className="flex items-center">
                       <FileText className="w-5 h-5 text-secondary-foreground mr-3" />
@@ -108,7 +109,7 @@ export default function RegistrationDetailsPage() {
                       </div>
                    </div>
                    <Button variant="outline" size="sm" asChild>
-                      <a href={reg.paymentProofUrl} target="_blank" rel="noopener noreferrer">View</a>
+                      <a href={typedReg.paymentProofUrl} target="_blank" rel="noopener noreferrer">View</a>
                    </Button>
                 </div>
              ) : (
@@ -117,13 +118,13 @@ export default function RegistrationDetailsPage() {
          </CardContent>
       </Card>
 
-      {isAdmin && reg.status === "Pending" && (
+      {isAdmin && typedReg.status === "Pending" && (
          <div className="bg-white p-6 rounded-xl border border-border shadow-sm flex flex-col sm:flex-row gap-4 justify-end items-center">
             <span className="text-sm text-muted-foreground mr-auto">Action required: Verify documents and approve registration.</span>
-            <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" onClick={() => updateReg({ id: reg.id, status: "Rejected" })}>
+            <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" onClick={() => updateReg({ id: typedReg.id, status: "Rejected" })}>
                <XCircle className="w-4 h-4 mr-2" /> Reject
             </Button>
-            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => updateReg({ id: reg.id, status: "Approved" })}>
+            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => updateReg({ id: typedReg.id, status: "Approved" })}>
                <CheckCircle className="w-4 h-4 mr-2" /> Approve Registration
             </Button>
          </div>

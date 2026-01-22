@@ -111,7 +111,7 @@ export default function StudentDashboard() {
                <div className="p-8 text-center">
                  <p className="text-sm text-muted-foreground">You haven't registered for any events yet.</p>
                  <Link href="/events">
-                   <Button variant="link" className="mt-2 text-secondary-foreground">Browse Events</Button>
+                   <Button variant="outline" className="mt-2 text-secondary-foreground">Browse Events</Button>
                  </Link>
                </div>
              )}

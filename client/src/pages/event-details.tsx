@@ -1,7 +1,7 @@
 import { useEvent } from "@/hooks/use-events";
 import { useRegistrations, useCreateRegistration } from "@/hooks/use-registrations";
 import { useAuth } from "@/hooks/use-auth";
-import { useRoute, useLocation } from "wouter";
+import { useRoute, useLocation, Link } from "wouter";
 import { Loader2, Calendar, MapPin, Clock, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -50,7 +50,9 @@ export default function EventDetailsPage() {
         stage: 4, // Completed
         studentInfo: {
             fullName: user.fullName,
-            gradeSection: user.gradeSection,
+            grade: user.grade,
+            section: user.section,
+            strand: user.strand,
             contact: user.contactNumber,
             email: user.email
         },
@@ -137,7 +139,7 @@ export default function EventDetailsPage() {
                  <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
                  <p className="text-green-800 font-semibold">You are registered!</p>
                  <Link href={`/registrations/${existingRegistration.id}`}>
-                    <Button variant="link" className="text-green-700">View Status</Button>
+                    <Button variant="outline" className="text-green-700 mt-2">View Status</Button>
                  </Link>
               </div>
             ) : (
@@ -180,16 +182,23 @@ export default function EventDetailsPage() {
                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
                  <div className="bg-muted/30 p-4 rounded-xl border border-border/50 space-y-2">
                    <div className="grid grid-cols-2 gap-2 text-sm">
-                     <span className="text-muted-foreground">Full Name:</span>
+                     <span className="text-muted-foreground uppercase font-bold">Full Name:</span>
                      <span className="font-medium text-right">{user?.fullName}</span>
                      
-                     <span className="text-muted-foreground">Student ID:</span>
+                     <span className="text-muted-foreground uppercase font-bold">LRN:</span>
                      <span className="font-medium text-right">{user?.username}</span>
                      
-                     <span className="text-muted-foreground">Grade/Section:</span>
-                     <span className="font-medium text-right">{user?.gradeSection || "N/A"}</span>
+                     <span className="text-muted-foreground uppercase font-bold">Grade/Section:</span>
+                     <span className="font-medium text-right">{user?.grade} - {user?.section}</span>
 
-                     <span className="text-muted-foreground">Contact:</span>
+                     {user?.strand && (
+                       <>
+                         <span className="text-muted-foreground uppercase font-bold">Strand:</span>
+                         <span className="font-medium text-right">{user?.strand}</span>
+                       </>
+                     )}
+
+                     <span className="text-muted-foreground uppercase font-bold">Contact:</span>
                      <span className="font-medium text-right">{user?.contactNumber || "N/A"}</span>
                    </div>
                  </div>
@@ -205,7 +214,7 @@ export default function EventDetailsPage() {
                       <ObjectUploader 
                         onGetUploadParameters={getUploadParameters}
                         onComplete={(result) => {
-                          const url = result.successful[0]?.uploadURL; 
+                          const url = result.successful?.[0]?.uploadURL; 
                           if (url) setParentConsentUrl(url); 
                         }}
                       >
@@ -213,7 +222,7 @@ export default function EventDetailsPage() {
                            <div className="bg-primary/10 p-3 rounded-full text-primary">
                              <ArrowLeft className="w-6 h-6 rotate-90" /> {/* Upload Icon placeholder */}
                            </div>
-                           <p className="font-medium">Upload Parent Consent Form</p>
+                           <p className="font-medium uppercase">Upload Parent Consent Form</p>
                            <p className="text-xs text-muted-foreground">PDF or Image (Max 5MB)</p>
                          </div>
                       </ObjectUploader>
@@ -229,7 +238,7 @@ export default function EventDetailsPage() {
                       <ObjectUploader 
                         onGetUploadParameters={getUploadParameters}
                         onComplete={(result) => {
-                          const url = result.successful[0]?.uploadURL; 
+                          const url = result.successful?.[0]?.uploadURL; 
                           if (url) setPaymentProofUrl(url); 
                         }}
                       >
@@ -237,7 +246,7 @@ export default function EventDetailsPage() {
                            <div className="bg-secondary/20 p-3 rounded-full text-secondary-foreground">
                              <ArrowLeft className="w-6 h-6 rotate-90" />
                            </div>
-                           <p className="font-medium">Upload Payment Proof</p>
+                           <p className="font-medium uppercase">Upload Payment Proof</p>
                            <p className="text-xs text-muted-foreground">Screenshot or Photo</p>
                          </div>
                       </ObjectUploader>
@@ -251,7 +260,7 @@ export default function EventDetailsPage() {
                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
                    <CheckCircle2 className="w-8 h-8" />
                  </div>
-                 <h3 className="text-xl font-bold">Ready to Submit!</h3>
+                 <h3 className="text-xl font-bold uppercase">Ready to Submit!</h3>
                  <p className="text-muted-foreground">
                    By clicking submit, you confirm that all provided details and documents are authentic.
                  </p>
@@ -260,19 +269,19 @@ export default function EventDetailsPage() {
            </div>
 
            <DialogFooter className="p-6 bg-muted/20 flex gap-2 justify-between sm:justify-between">
-             <Button variant="outline" onClick={prevStep} disabled={step === 1}>
+             <Button variant="outline" onClick={prevStep} disabled={step === 1} className="uppercase">
                Back
              </Button>
              
              {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) ? (
-                <Button onClick={handleRegister} disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white">
+                <Button onClick={handleRegister} disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white uppercase">
                   {isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : "Submit Registration"}
                 </Button>
              ) : (
                 <Button onClick={nextStep} disabled={
                     (step === 2 && !parentConsentUrl) || 
                     (step === 3 && event.fee > 0 && !paymentProofUrl)
-                }>
+                } className="uppercase">
                   Next Step
                 </Button>
              )}

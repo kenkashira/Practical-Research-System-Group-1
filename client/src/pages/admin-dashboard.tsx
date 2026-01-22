@@ -220,8 +220,8 @@ export default function AdminDashboard() {
                     <TableRow key={reg.id}>
                       <TableCell className="font-mono text-xs">{reg.referenceNumber}</TableCell>
                       <TableCell>
-                        <div className="font-medium">{reg.user?.fullName}</div>
-                        <div className="text-xs text-muted-foreground">{reg.user?.gradeSection}</div>
+                        <div className="font-medium uppercase">{reg.user?.fullName}</div>
+                        <div className="text-xs text-muted-foreground uppercase">{reg.user?.grade} - {reg.user?.section} {reg.user?.strand ? `(${reg.user?.strand})` : ""}</div>
                       </TableCell>
                       <TableCell>{reg.event?.title}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">
