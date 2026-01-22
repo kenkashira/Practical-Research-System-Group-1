@@ -1,0 +1,236 @@
+SYSTEM DESCRIPTION (PASTE THIS TO REPLIT AI)
+System Overview
+
+Build a web-based Event Registration System for Army’s Angels Integrated School, Inc. The system should be accessible on desktop and mobile browsers. It must support student event registration, admin verification, status tracking, and a dashboard displaying upcoming school events.
+
+The system should function similarly to an online application portal (e.g., DOST Scholarship system), where users complete registration in stages, save progress, and track application status.
+
+USER ROLES
+1. Student
+
+Students can:
+
+View upcoming school events
+
+Register for events
+
+Upload required documents
+
+Track registration status
+
+Receive a reference number and email confirmation
+
+2. Admin / Teacher
+
+Admins can:
+
+Create and manage events
+
+View student registrations
+
+Verify documents
+
+Approve, reject, or keep registrations pending
+
+Generate participant lists
+
+STUDENT INTERFACE DESIGN
+Login Page
+
+Fields:
+
+Student ID / LRN
+
+Default password
+
+Login authentication required before access
+
+Student Dashboard
+
+After login, the student is redirected to a dashboard page that displays:
+
+Upcoming Events Section
+
+Event cards showing:
+
+Event title
+
+Date
+
+Short description
+
+Registration deadline
+
+“View Details” button
+
+My Registrations Section
+
+List of events the student registered for
+
+Status indicator:
+
+Pending
+
+Approved
+
+Rejected
+
+Reference number (if submitted)
+
+Event Details Page
+
+When a student clicks a specific event:
+
+Display:
+
+Event name
+
+Event description
+
+Date and time
+
+Venue
+
+Event fee (if applicable)
+
+Requirements (parent consent, payment proof)
+
+Buttons:
+
+“Register for Event”
+
+“Continue Registration” (if already started)
+
+EVENT REGISTRATION PROCESS (STAGES)
+Stage 1: Student Information
+
+Form fields:
+
+Full name (auto-filled if available)
+
+Student ID / LRN
+
+Grade and Section
+
+Email address (used for Gmail notifications)
+
+Contact number
+
+Features:
+
+Save progress
+
+Edit information before final submission
+
+Stage 2: Parent Consent
+
+Upload image of signed parental consent form
+
+Accepted formats: JPG / PNG
+
+Status automatically set to Pending
+
+Preview uploaded image
+
+Stage 3: Payment Submission (If Required)
+
+Upload image of proof of payment
+
+Accepted formats: JPG / PNG
+
+Status automatically set to Pending
+
+Preview uploaded receipt
+
+Stage 4: Final Submission
+
+Review all entered information
+
+Submit registration
+
+Upon submission:
+
+System generates a random reference number
+
+Reference number is:
+
+Stored in the database
+
+Displayed on the screen
+
+Sent to the student’s Gmail
+
+Registration status remains Pending until admin verification
+
+EMAIL NOTIFICATION
+
+Automatically send an email to the student’s Gmail containing:
+
+Event name
+
+Reference number
+
+Registration status
+
+Email is sent upon final submission and approval
+
+ADMIN DASHBOARD DESIGN
+Admin Dashboard
+
+Event Management:
+
+Create new events
+
+Edit or delete events
+
+Registration Management:
+
+View list of registered students per event
+
+View uploaded documents
+
+See reference numbers
+
+Filter by status (Pending, Approved, Rejected)
+
+Verification Controls
+
+For each student registration:
+
+Buttons:
+
+Approve
+
+Reject
+
+Keep Pending
+
+Ability to add remarks
+
+VERIFICATION FEATURE
+
+Each registration has a unique random reference number
+
+Teachers can verify students in person using this number
+
+Students cannot edit the reference number
+
+SYSTEM BEHAVIOR AND RULES
+
+Students cannot modify submissions after admin approval
+
+Admins have full control over event and registration data
+
+Uploaded files are stored securely
+
+System prevents duplicate registrations for the same event
+
+DESIGN PREFERENCE
+
+Clean, simple UI
+
+School-themed colors
+
+Mobile responsive
+
+Easy navigation with progress indicators for stages
