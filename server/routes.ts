@@ -211,6 +211,17 @@ export async function registerRoutes(
     res.json(reg);
   });
 
+  app.patch("/api/user/role", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const { role } = req.body;
+    if (role !== "student" && role !== "admin") return res.status(400).send("Invalid role");
+    
+    await storage.updateUserRole(req.user!.id, role);
+    // Update the session user
+    (req.user as any).role = role;
+    res.json({ success: true });
+  });
+
   return httpServer;
 }
 

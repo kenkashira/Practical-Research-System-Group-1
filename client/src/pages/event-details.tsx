@@ -68,6 +68,8 @@ export default function EventDetailsPage() {
     }
   };
 
+  const isStarted = existingRegistration && existingRegistration.stage < 4;
+
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
 
@@ -134,7 +136,7 @@ export default function EventDetailsPage() {
               </div>
             </div>
 
-            {existingRegistration ? (
+            {existingRegistration && existingRegistration.stage === 4 ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                  <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
                  <p className="text-green-800 font-semibold">You are registered!</p>
@@ -145,10 +147,10 @@ export default function EventDetailsPage() {
             ) : (
               <Button 
                 size="lg" 
-                className="w-full text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all"
+                className="w-full text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all uppercase"
                 onClick={() => setIsWizardOpen(true)}
               >
-                Register Now
+                {isStarted ? "Continue Registration" : "Register Now"}
               </Button>
             )}
           </div>

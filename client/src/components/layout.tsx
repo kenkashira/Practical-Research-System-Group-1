@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="md:hidden bg-primary text-primary-foreground p-4 flex justify-between items-center shadow-md z-50 relative">
-        <span className="font-display font-bold text-lg">Army's Angels IS</span>
+        <span className="font-display font-bold text-lg uppercase">Portal</span>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
@@ -73,10 +73,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             A
           </div>
           <div>
-            <h1 className="font-display font-bold text-lg leading-tight text-primary">
-              Army's Angels
+            <h1 className="font-display font-bold text-lg leading-tight text-primary uppercase">
+              Event Portal
             </h1>
-            <p className="text-xs text-muted-foreground">Integrated School</p>
           </div>
         </div>
 
@@ -114,16 +113,36 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {user.fullName.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium truncate">{user.fullName}</p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {user.role}
-              </p>
+            <div className="overflow-hidden flex-1">
+              <p className="text-sm font-medium truncate uppercase">{user.fullName}</p>
+              <div className="flex items-center justify-between gap-1">
+                <p className="text-[10px] text-muted-foreground uppercase">
+                  {user.role}
+                </p>
+                <button 
+                  onClick={async () => {
+                    const newRole = user.role === 'admin' ? 'student' : 'admin';
+                    try {
+                      const res = await fetch('/api/user/role', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: newRole })
+                      });
+                      if (res.ok) window.location.reload();
+                    } catch (e) {
+                      console.error(e);
+                    }
+                  }}
+                  className="text-[10px] text-primary hover:underline uppercase font-bold"
+                >
+                  Switch to {user.role === 'admin' ? 'student' : 'admin'}
+                </button>
+              </div>
             </div>
           </div>
           <Button
             variant="ghost"
-            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 uppercase"
             onClick={() => logout()}
           >
             <LogOut className="w-4 h-4 mr-2" />

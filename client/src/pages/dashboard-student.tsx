@@ -25,20 +25,20 @@ export default function StudentDashboard() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-end">
         <div>
-           <h2 className="text-3xl font-display font-bold text-primary">Welcome, {user?.fullName.split(" ")[0]}!</h2>
-           <p className="text-muted-foreground mt-1">Here's what's happening at Army's Angels.</p>
+           <h2 className="text-3xl font-display font-bold text-primary uppercase">Welcome, {user?.fullName.split(" ")[0]}!</h2>
+           <p className="text-muted-foreground mt-1 uppercase">Here's what's happening at Army's Angels.</p>
         </div>
         <Link href="/events">
-           <Button variant="outline" className="hidden md:flex">Browse All Events</Button>
+           <Button variant="outline" className="hidden md:flex uppercase">Browse All Events</Button>
         </Link>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-6 text-primary-foreground shadow-lg shadow-primary/20">
           <div className="flex justify-between items-start">
              <div>
-               <p className="text-primary-foreground/80 font-medium text-sm">Active Registrations</p>
+               <p className="text-primary-foreground/80 font-medium text-sm uppercase">Active Registrations</p>
                <h3 className="text-4xl font-display font-bold mt-2">
                  {myRegistrations.filter(r => r.status === 'Pending' || r.status === 'Approved').length}
                </h3>
@@ -49,9 +49,8 @@ export default function StudentDashboard() {
           </div>
         </div>
         
-        {/* Placeholder stats */}
          <div className="bg-white rounded-2xl p-6 border border-border shadow-sm">
-           <p className="text-muted-foreground font-medium text-sm">Approved Events</p>
+           <p className="text-muted-foreground font-medium text-sm uppercase">Approved Events</p>
            <h3 className="text-4xl font-display font-bold mt-2 text-foreground">
              {myRegistrations.filter(r => r.status === 'Approved').length}
            </h3>
@@ -62,8 +61,8 @@ export default function StudentDashboard() {
         {/* Upcoming Events Column */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold font-display">Upcoming Events</h3>
-            <Link href="/events" className="text-sm text-primary hover:underline md:hidden">View All</Link>
+            <h3 className="text-xl font-bold font-display uppercase">Upcoming Events</h3>
+            <Link href="/events" className="text-sm text-primary hover:underline md:hidden uppercase">View All</Link>
           </div>
           
           <div className="grid md:grid-cols-2 gap-6">
@@ -73,7 +72,7 @@ export default function StudentDashboard() {
               ))
             ) : (
               <div className="col-span-2 text-center py-12 bg-white rounded-2xl border border-dashed">
-                <p className="text-muted-foreground">No upcoming events right now.</p>
+                <p className="text-muted-foreground uppercase">No upcoming events right now.</p>
               </div>
             )}
           </div>
@@ -82,8 +81,8 @@ export default function StudentDashboard() {
         {/* Recent Registrations Column */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold font-display">My Registrations</h3>
-            <Link href="/registrations" className="text-sm text-primary hover:underline">View All</Link>
+            <h3 className="text-xl font-bold font-display uppercase">My Registrations</h3>
+            <Link href="/registrations" className="text-sm text-primary hover:underline uppercase">View All</Link>
           </div>
 
           <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
@@ -93,14 +92,14 @@ export default function StudentDashboard() {
                    <Link key={reg.id} href={`/registrations/${reg.id}`}>
                      <div className="p-4 hover:bg-muted/50 transition-colors cursor-pointer group">
                        <div className="flex justify-between items-start mb-1">
-                         <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">{reg.event?.title || "Unknown Event"}</h4>
+                         <h4 className="font-semibold text-sm group-hover:text-primary transition-colors uppercase">{reg.event?.title || "Unknown Event"}</h4>
                          <StatusBadge status={reg.status} />
                        </div>
                        <p className="text-xs text-muted-foreground mb-2">
-                         Ref: <span className="font-mono">{reg.referenceNumber}</span>
+                         Ref: <span className="font-mono uppercase">{reg.referenceNumber}</span>
                        </p>
                        <div className="text-xs text-muted-foreground flex items-center justify-between">
-                         <span>Submitted {format(new Date(reg.createdAt), 'MMM d')}</span>
+                         <span className="uppercase">Submitted {format(new Date(reg.createdAt), 'MMM d')}</span>
                          <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
                        </div>
                      </div>
@@ -109,9 +108,9 @@ export default function StudentDashboard() {
                </div>
              ) : (
                <div className="p-8 text-center">
-                 <p className="text-sm text-muted-foreground">You haven't registered for any events yet.</p>
+                 <p className="text-sm text-muted-foreground uppercase">You haven't registered for any events yet.</p>
                  <Link href="/events">
-                   <Button variant="outline" className="mt-2 text-secondary-foreground">Browse Events</Button>
+                   <Button variant="outline" className="mt-2 text-secondary-foreground uppercase">Browse Events</Button>
                  </Link>
                </div>
              )}
