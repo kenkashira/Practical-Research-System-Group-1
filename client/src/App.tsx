@@ -10,6 +10,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import EventsPage from "@/pages/events-page";
 import EventDetailsPage from "@/pages/event-details";
 import RegistrationDetailsPage from "@/pages/registration-details";
+import SettingsPage from "@/pages/settings-page";
 import Layout from "@/components/layout";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
@@ -68,6 +69,9 @@ function Router() {
       </Route>
       <Route path="/registrations/:id">
         <ProtectedRoute component={RegistrationDetailsPage} />
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute component={SettingsPage} />
       </Route>
 
       {/* Admin Routes */}

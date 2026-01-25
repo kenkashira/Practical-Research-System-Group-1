@@ -69,6 +69,22 @@ export async function registerRoutes(
     res.json(req.user);
   });
 
+  app.patch("/api/user/profile", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const { email, contactNumber, password } = req.body;
+      const updates: any = {};
+      if (email !== undefined) updates.email = email;
+      if (contactNumber !== undefined) updates.contactNumber = contactNumber;
+      if (password !== undefined) updates.password = password;
+
+      const updated = await storage.updateUserProfile(req.user!.id, updates);
+      res.json(updated);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   app.post(api.auth.logout.path, (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);

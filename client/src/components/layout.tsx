@@ -34,6 +34,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       href: "/events",
       icon: Calendar,
     },
+    {
+      label: "Settings",
+      href: "/settings",
+      icon: ShieldCheck,
+    },
     ...(isAdmin
       ? [
           {

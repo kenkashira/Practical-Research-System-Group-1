@@ -2,7 +2,7 @@ import { useEvent } from "@/hooks/use-events";
 import { useRegistrations, useCreateRegistration } from "@/hooks/use-registrations";
 import { useAuth } from "@/hooks/use-auth";
 import { useRoute, useLocation, Link } from "wouter";
-import { Loader2, Calendar, MapPin, Clock, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Loader2, Calendar, MapPin, Clock, ArrowLeft, CheckCircle2, FileUp, Mail, User, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { InsertRegistration } from "@shared/schema";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { useUpload } from "@/hooks/use-upload";
+import { cn } from "@/lib/utils";
 
 // This page implements the Registration Wizard
 export default function EventDetailsPage() {
@@ -21,6 +22,7 @@ export default function EventDetailsPage() {
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const { data: registrations } = useRegistrations();
+  const { toast } = useToast();
   
   // Registration Wizard State
   const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -62,6 +64,12 @@ export default function EventDetailsPage() {
 
       await createRegistration(payload);
       setIsWizardOpen(false);
+      
+      toast({
+        title: "Registration Submitted",
+        description: "Your registration is now pending review.",
+      });
+
       setLocation("/registrations");
     } catch (error) {
       console.error(error);
@@ -160,59 +168,74 @@ export default function EventDetailsPage() {
       {/* Registration Wizard Dialog */}
       <Dialog open={isWizardOpen} onOpenChange={setIsWizardOpen}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-card">
-           <DialogHeader className="p-6 pb-2">
-             <DialogTitle className="font-display text-2xl">Event Registration</DialogTitle>
-             <DialogDescription>
+          <DialogHeader className="p-6 pb-2">
+             <DialogTitle className="font-display text-2xl uppercase">Event Registration</DialogTitle>
+             <div className="flex items-center gap-1 mt-2 mb-4">
+                {[1, 2, 3, 4].map((i) => {
+                  const totalSteps = event.fee > 0 ? 4 : 3;
+                  if (i > totalSteps) return null;
+                  const isActive = step >= i;
+                  return (
+                    <div key={i} className="flex-1 flex items-center gap-1">
+                      <div className={cn(
+                        "h-1.5 flex-1 rounded-full transition-all duration-300",
+                        isActive ? "bg-primary" : "bg-muted"
+                      )} />
+                    </div>
+                  );
+                })}
+             </div>
+             <DialogDescription className="uppercase font-bold text-xs text-primary">
                Step {step} of {event.fee > 0 ? 4 : 3}: {
-                 step === 1 ? "Verify Information" :
+                 step === 1 ? "Student Information" :
                  step === 2 ? "Parent Consent" :
-                 step === 3 && event.fee > 0 ? "Payment" : "Review"
+                 step === 3 && event.fee > 0 ? "Payment Submission" : "Final Review"
                }
              </DialogDescription>
-             
-             {/* Progress Bar */}
-             <div className="w-full bg-muted h-1.5 mt-4 rounded-full overflow-hidden">
-               <div 
-                 className="bg-primary h-full transition-all duration-300 ease-in-out" 
-                 style={{ width: `${(step / (event.fee > 0 ? 4 : 3)) * 100}%` }}
-               />
-             </div>
-           </DialogHeader>
+          </DialogHeader>
 
-           <div className="p-6 pt-2">
-             {step === 1 && (
+          <div className="p-6 pt-2">
+            {step === 1 && (
                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
-                 <div className="bg-muted/30 p-4 rounded-xl border border-border/50 space-y-2">
-                   <div className="grid grid-cols-2 gap-2 text-sm">
-                     <span className="text-muted-foreground uppercase font-bold">Full Name:</span>
-                     <span className="font-medium text-right">{user?.fullName}</span>
-                     
-                     <span className="text-muted-foreground uppercase font-bold">LRN:</span>
-                     <span className="font-medium text-right">{user?.username}</span>
-                     
-                     <span className="text-muted-foreground uppercase font-bold">Grade/Section:</span>
-                     <span className="font-medium text-right">{user?.grade} - {user?.section}</span>
-
-                     {user?.strand && (
-                       <>
-                         <span className="text-muted-foreground uppercase font-bold">Strand:</span>
-                         <span className="font-medium text-right">{user?.strand}</span>
-                       </>
-                     )}
-
-                     <span className="text-muted-foreground uppercase font-bold">Contact:</span>
-                     <span className="font-medium text-right">{user?.contactNumber || "N/A"}</span>
-                   </div>
+                 <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Full Name</label>
+                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.fullName}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Student ID / LRN</label>
+                      <div className="p-2.5 bg-muted rounded-lg text-sm font-mono opacity-70 border border-border/50">{user?.username}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Grade & Section</label>
+                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.grade} - {user?.section}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Email Address</label>
+                      <div className="p-2.5 bg-white rounded-lg text-sm font-medium border border-border/50 flex items-center gap-2">
+                        <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="truncate">{user?.email}</span>
+                      </div>
+                    </div>
                  </div>
-                 <p className="text-sm text-muted-foreground italic text-center">
-                   Is this information correct? You can update it in your profile settings.
-                 </p>
+                 <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex items-start gap-3">
+                    <div className="p-1.5 bg-white rounded-md text-primary shadow-sm">
+                      <User className="w-3.5 h-3.5" />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-tight uppercase font-medium">
+                      Information is pulled from your profile. Update it in <Link href="/settings" className="text-primary hover:underline font-bold">Settings</Link> if incorrect.
+                    </p>
+                 </div>
                </div>
-             )}
+            )}
 
-             {step === 2 && (
-                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300 text-center">
-                   <div className="border-2 border-dashed border-border rounded-xl p-8 hover:bg-muted/10 transition-colors">
+            {step === 2 && (
+                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                   <div className="text-center space-y-2 mb-4">
+                     <h4 className="font-bold uppercase text-sm">Upload Consent Form</h4>
+                     <p className="text-xs text-muted-foreground uppercase">Please upload a photo of your signed parental consent form.</p>
+                   </div>
+                   <div className="border-2 border-dashed border-border rounded-2xl p-8 hover:bg-muted/10 transition-colors">
                       <ObjectUploader 
                         onGetUploadParameters={getUploadParameters}
                         onComplete={(result) => {
@@ -220,23 +243,43 @@ export default function EventDetailsPage() {
                           if (url) setParentConsentUrl(url); 
                         }}
                       >
-                         <div className="flex flex-col items-center gap-2 cursor-pointer">
-                           <div className="bg-primary/10 p-3 rounded-full text-primary">
-                             <ArrowLeft className="w-6 h-6 rotate-90" /> {/* Upload Icon placeholder */}
-                           </div>
-                           <p className="font-medium uppercase">Upload Parent Consent Form</p>
-                           <p className="text-xs text-muted-foreground">PDF or Image (Max 5MB)</p>
+                         <div className="flex flex-col items-center gap-3 cursor-pointer">
+                           {parentConsentUrl ? (
+                             <div className="relative group">
+                               <img src={parentConsentUrl} className="w-32 h-32 object-cover rounded-xl border border-border" alt="Preview" />
+                               <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                 <p className="text-[10px] text-white font-bold uppercase">Change Image</p>
+                               </div>
+                             </div>
+                           ) : (
+                             <>
+                               <div className="bg-primary/10 p-4 rounded-full text-primary">
+                                 <FileUp className="w-6 h-6" />
+                               </div>
+                               <p className="font-bold text-sm uppercase">Tap to Upload Form</p>
+                             </>
+                           )}
                          </div>
                       </ObjectUploader>
-                      {parentConsentUrl && <p className="text-green-600 text-sm mt-2 font-medium">File Uploaded!</p>}
                    </div>
+                   {parentConsentUrl && (
+                     <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
+                       <CheckCircle2 className="w-4 h-4 text-green-600" />
+                       <span className="text-[11px] text-green-700 font-bold uppercase">Form successfully attached</span>
+                     </div>
+                   )}
                 </div>
-             )}
+            )}
 
-             {step === 3 && event.fee > 0 && (
-                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300 text-center">
-                   <p className="text-sm text-muted-foreground">Please pay <span className="font-bold text-foreground">PHP {event.fee}</span> to GCash: 09123456789</p>
-                   <div className="border-2 border-dashed border-border rounded-xl p-8 hover:bg-muted/10 transition-colors">
+            {step === 3 && event.fee > 0 && (
+                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                   <div className="bg-secondary/10 p-4 rounded-xl border border-secondary/20 text-center space-y-1">
+                     <p className="text-xs text-muted-foreground uppercase">Amount to Pay</p>
+                     <p className="text-2xl font-display font-bold text-secondary-foreground">PHP {event.fee}</p>
+                     <p className="text-[10px] text-muted-foreground uppercase mt-2">GCash: 0912 345 6789 (Army's Angels)</p>
+                   </div>
+                   
+                   <div className="border-2 border-dashed border-border rounded-2xl p-8 hover:bg-muted/10 transition-colors">
                       <ObjectUploader 
                         onGetUploadParameters={getUploadParameters}
                         onComplete={(result) => {
@@ -244,46 +287,90 @@ export default function EventDetailsPage() {
                           if (url) setPaymentProofUrl(url); 
                         }}
                       >
-                         <div className="flex flex-col items-center gap-2 cursor-pointer">
-                           <div className="bg-secondary/20 p-3 rounded-full text-secondary-foreground">
-                             <ArrowLeft className="w-6 h-6 rotate-90" />
-                           </div>
-                           <p className="font-medium uppercase">Upload Payment Proof</p>
-                           <p className="text-xs text-muted-foreground">Screenshot or Photo</p>
+                         <div className="flex flex-col items-center gap-3 cursor-pointer">
+                           {paymentProofUrl ? (
+                             <div className="relative group">
+                               <img src={paymentProofUrl} className="w-32 h-32 object-cover rounded-xl border border-border" alt="Preview" />
+                               <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                 <p className="text-[10px] text-white font-bold uppercase">Change Image</p>
+                               </div>
+                             </div>
+                           ) : (
+                             <>
+                               <div className="bg-secondary/10 p-4 rounded-full text-secondary-foreground">
+                                 <FileUp className="w-6 h-6" />
+                               </div>
+                               <p className="font-bold text-sm uppercase">Upload Payment Receipt</p>
+                             </>
+                           )}
                          </div>
                       </ObjectUploader>
-                      {paymentProofUrl && <p className="text-green-600 text-sm mt-2 font-medium">Proof Uploaded!</p>}
                    </div>
+                   {paymentProofUrl && (
+                     <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
+                       <CheckCircle2 className="w-4 h-4 text-green-600" />
+                       <span className="text-[11px] text-green-700 font-bold uppercase">Receipt successfully attached</span>
+                     </div>
+                   )}
                 </div>
-             )}
+            )}
 
-             {(step === 4 || (step === 3 && event.fee === 0)) && (
-               <div className="space-y-4 animate-in slide-in-from-right-8 duration-300 text-center py-4">
-                 <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-4">
-                   <CheckCircle2 className="w-8 h-8" />
+            {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) && (
+               <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                 <div className="bg-muted/30 rounded-2xl border border-border/50 overflow-hidden">
+                    <div className="p-4 bg-muted/50 border-b border-border/50">
+                      <h4 className="font-bold uppercase text-xs">Registration Summary</h4>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground uppercase font-medium">Event</span>
+                        <span className="font-bold uppercase">{event.title}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground uppercase font-medium">Student</span>
+                        <span className="font-bold uppercase">{user?.fullName}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground uppercase font-medium">Consent Form</span>
+                        <Badge variant="outline" className="text-[9px] bg-green-50 text-green-700 border-green-100 uppercase">Attached</Badge>
+                      </div>
+                      {event.fee > 0 && (
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-muted-foreground uppercase font-medium">Payment Proof</span>
+                          <Badge variant="outline" className="text-[9px] bg-green-50 text-green-700 border-green-100 uppercase">Attached</Badge>
+                        </div>
+                      )}
+                    </div>
                  </div>
-                 <h3 className="text-xl font-bold uppercase">Ready to Submit!</h3>
-                 <p className="text-muted-foreground">
-                   By clicking submit, you confirm that all provided details and documents are authentic.
-                 </p>
+                 
+                 <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex gap-4">
+                    <ShieldCheck className="w-6 h-6 text-amber-600 shrink-0" />
+                    <div>
+                      <h4 className="text-amber-900 font-bold uppercase text-xs mb-1">Confirmation</h4>
+                      <p className="text-amber-800 text-[10px] uppercase leading-tight">
+                        By submitting, you agree that all information provided is accurate and true. 
+                        Your registration will be reviewed by the school administration.
+                      </p>
+                    </div>
+                 </div>
                </div>
-             )}
-           </div>
+            )}
+          </div>
 
            <DialogFooter className="p-6 bg-muted/20 flex gap-2 justify-between sm:justify-between">
              <Button variant="outline" onClick={prevStep} disabled={step === 1} className="uppercase">
                Back
              </Button>
              
-             {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) ? (
-                <Button onClick={handleRegister} disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white uppercase">
-                  {isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : "Submit Registration"}
+              {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) ? (
+                <Button onClick={handleRegister} disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white uppercase min-w-[140px]">
+                  {isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : "Final Submit"}
                 </Button>
              ) : (
                 <Button onClick={nextStep} disabled={
                     (step === 2 && !parentConsentUrl) || 
                     (step === 3 && event.fee > 0 && !paymentProofUrl)
-                } className="uppercase">
+                } className="uppercase min-w-[140px]">
                   Next Step
                 </Button>
              )}
