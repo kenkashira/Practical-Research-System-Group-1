@@ -96,7 +96,7 @@ export default function StudentDashboard() {
                          <StatusBadge status={reg.status} />
                        </div>
                        <p className="text-xs text-muted-foreground mb-2">
-                         Ref: <span className="font-mono uppercase">{reg.referenceNumber}</span>
+                         REF: <span className="font-mono uppercase">{reg.referenceNumber}</span>
                        </p>
                        <div className="text-xs text-muted-foreground flex items-center justify-between">
                          <span className="uppercase">Submitted {format(new Date(reg.createdAt), 'MMM d')}</span>

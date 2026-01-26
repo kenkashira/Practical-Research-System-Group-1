@@ -60,7 +60,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="md:hidden bg-primary text-primary-foreground p-4 flex justify-between items-center shadow-md z-50 relative">
-        <span className="font-display font-bold text-lg uppercase">Portal</span>
+        <span className="font-display font-bold text-lg uppercase tracking-wider">AAIS Event Portal</span>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
@@ -73,7 +73,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-4">
+        <div className="p-6 border-b border-border/50 bg-primary/5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold font-display text-xl shadow-lg shadow-primary/30">
+              A
+            </div>
+            <div>
+              <h1 className="font-display font-bold text-sm leading-tight text-primary uppercase tracking-tighter">
+                AAIS Event Portal
+              </h1>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location === item.href;
             return (

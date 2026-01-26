@@ -202,10 +202,15 @@ export async function registerRoutes(
     try {
       const input = api.registrations.update.input.parse(req.body);
       
-      // If student is updating, prevent status/remarks changes (though Zod might allow, logic should restrict)
-      // For MVP, we trust the input schema which allows partials, but in robust app we'd filter fields based on role.
-      
       const updated = await storage.updateRegistration(id, input);
+
+      // Email notification simulation
+      if (input.status === "Approved") {
+        console.log(`[EMAIL SIMULATION] Sending approval email to student ${existing.userId} for event ${existing.eventId}. Reference: ${existing.referenceNumber}`);
+      } else if (input.status === "Rejected") {
+        console.log(`[EMAIL SIMULATION] Sending rejection email to student ${existing.userId} for event ${existing.eventId}. Remarks: ${input.remarks || "No remarks provided"}`);
+      }
+
       res.json(updated);
     } catch (err) {
       if (err instanceof z.ZodError) {
