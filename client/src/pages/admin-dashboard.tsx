@@ -60,18 +60,18 @@ export default function AdminDashboard() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-display font-bold text-primary">Admin Dashboard</h2>
-          <p className="text-muted-foreground">Manage events and verify student registrations.</p>
+          <h2 className="text-3xl font-display font-bold text-primary uppercase">Admin Dashboard</h2>
+          <p className="text-muted-foreground uppercase">Manage events and verify student registrations.</p>
         </div>
         <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="shadow-lg shadow-primary/20">
+            <Button className="shadow-lg shadow-primary/20 uppercase font-bold">
               <Plus className="w-4 h-4 mr-2" /> Create Event
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Create New Event</DialogTitle>
+              <DialogTitle className="uppercase font-display">Create New Event</DialogTitle>
             </DialogHeader>
             <Form {...eventForm}>
               <form onSubmit={eventForm.handleSubmit(onSubmitEvent)} className="space-y-4 py-4">
@@ -80,8 +80,8 @@ export default function AdminDashboard() {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Event Title</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <FormLabel className="uppercase font-bold text-xs">Event Title</FormLabel>
+                      <FormControl><Input {...field} className="rounded-xl" /></FormControl>
                     </FormItem>
                   )}
                 />
@@ -90,8 +90,8 @@ export default function AdminDashboard() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl><Textarea {...field} /></FormControl>
+                      <FormLabel className="uppercase font-bold text-xs">Description</FormLabel>
+                      <FormControl><Textarea {...field} className="rounded-xl resize-none" /></FormControl>
                     </FormItem>
                   )}
                 />
@@ -101,8 +101,8 @@ export default function AdminDashboard() {
                     name="date"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Date (YYYY-MM-DD)</FormLabel>
-                        <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} /></FormControl>
+                        <FormLabel className="uppercase font-bold text-xs">Date & Time</FormLabel>
+                        <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} className="rounded-xl" /></FormControl>
                         </FormItem>
                     )}
                     />
@@ -111,8 +111,8 @@ export default function AdminDashboard() {
                     name="venue"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Venue</FormLabel>
-                        <FormControl><Input {...field} /></FormControl>
+                        <FormLabel className="uppercase font-bold text-xs">Venue</FormLabel>
+                        <FormControl><Input {...field} className="rounded-xl" /></FormControl>
                         </FormItem>
                     )}
                     />
@@ -123,8 +123,8 @@ export default function AdminDashboard() {
                     name="fee"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Fee (PHP)</FormLabel>
-                        <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl>
+                        <FormLabel className="uppercase font-bold text-xs">Fee (PHP)</FormLabel>
+                        <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} className="rounded-xl" /></FormControl>
                         </FormItem>
                     )}
                     />
@@ -133,8 +133,8 @@ export default function AdminDashboard() {
                     name="deadline"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Deadline</FormLabel>
-                        <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} /></FormControl>
+                        <FormLabel className="uppercase font-bold text-xs">Deadline</FormLabel>
+                        <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} className="rounded-xl" /></FormControl>
                         </FormItem>
                     )}
                     />
@@ -144,14 +144,14 @@ export default function AdminDashboard() {
                     name="imageUrl"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Image URL (Optional)</FormLabel>
-                        <FormControl><Input placeholder="https://..." {...field} value={field.value || ''} /></FormControl>
+                        <FormLabel className="uppercase font-bold text-xs">Image URL (Optional)</FormLabel>
+                        <FormControl><Input placeholder="https://..." {...field} value={field.value || ''} className="rounded-xl" /></FormControl>
                         </FormItem>
                     )}
                 />
                 <DialogFooter>
-                   <Button type="submit" disabled={isCreating}>
-                     {isCreating ? <Loader2 className="animate-spin" /> : "Create Event"}
+                   <Button type="submit" disabled={isCreating} className="w-full uppercase font-bold py-6 rounded-xl shadow-lg shadow-primary/20">
+                     {isCreating ? <Loader2 className="animate-spin w-5 h-5" /> : "Publish Event"}
                    </Button>
                 </DialogFooter>
               </form>
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold font-display">Registration Management</h3>
+            <h3 className="text-xl font-bold font-display uppercase">Registration Management</h3>
             <div className="flex gap-2">
                {["All", "Pending", "Approved", "Rejected"].map(s => (
                    <Button 
@@ -195,6 +195,7 @@ export default function AdminDashboard() {
                       variant={filterStatus === s ? "default" : "outline"}
                       size="sm"
                       onClick={() => setFilterStatus(s)}
+                      className="uppercase font-bold text-[10px] px-3 h-8 rounded-lg"
                    >
                      {s}
                    </Button>
@@ -204,14 +205,14 @@ export default function AdminDashboard() {
 
         <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
            <Table>
-             <TableHeader>
+             <TableHeader className="bg-muted/50">
                <TableRow>
-                 <TableHead>Ref No.</TableHead>
-                 <TableHead>Student</TableHead>
-                 <TableHead>Event</TableHead>
-                 <TableHead>Date</TableHead>
-                 <TableHead>Status</TableHead>
-                 <TableHead className="text-right">Actions</TableHead>
+                 <TableHead className="uppercase font-bold text-[10px]">Ref No.</TableHead>
+                 <TableHead className="uppercase font-bold text-[10px]">Student</TableHead>
+                 <TableHead className="uppercase font-bold text-[10px]">Event</TableHead>
+                 <TableHead className="uppercase font-bold text-[10px]">Date</TableHead>
+                 <TableHead className="uppercase font-bold text-[10px]">Status</TableHead>
+                 <TableHead className="text-right uppercase font-bold text-[10px]">Actions</TableHead>
                </TableRow>
              </TableHeader>
              <TableBody>

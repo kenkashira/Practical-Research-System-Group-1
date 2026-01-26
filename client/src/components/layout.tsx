@@ -73,18 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           isMobileMenuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         )}
       >
-        <div className="p-6 border-b border-border/50 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold font-display text-xl shadow-lg shadow-primary/30">
-            A
-          </div>
-          <div>
-            <h1 className="font-display font-bold text-lg leading-tight text-primary uppercase">
-              Event Portal
-            </h1>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-4">
           {navItems.map((item) => {
             const isActive = location === item.href;
             return (
