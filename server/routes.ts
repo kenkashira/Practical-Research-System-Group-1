@@ -198,6 +198,11 @@ export async function registerRoutes(
     const existing = await storage.getRegistration(id);
     if (!existing) return res.status(404).json({ message: "Registration not found" });
 
+    // Students cannot modify submissions after admin approval
+    if (req.user.role !== "admin" && existing.status === "Approved") {
+       return res.status(403).json({ message: "Approved registrations cannot be modified" });
+    }
+
     // Students can update pending registrations (e.g. stages), Admins can update status
     if (req.user.role !== "admin" && existing.userId !== req.user.id) {
        return res.status(401).json({ message: "Unauthorized" });

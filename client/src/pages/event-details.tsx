@@ -45,6 +45,18 @@ export default function EventDetailsPage() {
   const handleRegister = async () => {
     try {
       if (!user) return;
+
+      // Double check for existing registration locally as well
+      const alreadyRegistered = registrations?.some(r => r.eventId === eventId && r.userId === user?.id && r.stage === 4);
+      if (alreadyRegistered) {
+        toast({
+          title: "Already Registered",
+          description: "You have already submitted a registration for this event.",
+          variant: "destructive"
+        });
+        setIsWizardOpen(false);
+        return;
+      }
       
       const payload: InsertRegistration = {
         userId: user.id,

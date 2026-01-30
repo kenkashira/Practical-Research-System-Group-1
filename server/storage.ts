@@ -90,6 +90,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createRegistration(registration: InsertRegistration): Promise<Registration> {
+    // Prevent duplicate registrations for the same event by the same user
+    const existing = await db.select().from(registrations)
+      .where(
+        and(
+          eq(registrations.userId, registration.userId),
+          eq(registrations.eventId, registration.eventId)
+        )
+      );
+
+    if (existing.length > 0) {
+      throw new Error("You are already registered for this event");
+    }
+
     // Generate a random reference number
     const referenceNumber = Math.random().toString(36).substring(2, 10).toUpperCase();
     
