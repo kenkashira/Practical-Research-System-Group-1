@@ -177,6 +177,10 @@ export async function registerRoutes(
       const regData = { ...input, userId: req.user.id };
       
       const registration = await storage.createRegistration(regData);
+      
+      // Email notification simulation for final submission
+      console.log(`[EMAIL SIMULATION] Sending submission confirmation email to student ${req.user.id} for event ${input.eventId}. Reference: ${registration.referenceNumber}`);
+      
       res.status(201).json(registration);
     } catch (err) {
        if (err instanceof z.ZodError) {
@@ -205,10 +209,13 @@ export async function registerRoutes(
       const updated = await storage.updateRegistration(id, input);
 
       // Email notification simulation
+      const event = await storage.getEvent(existing.eventId);
+      const eventName = event?.title || "Unknown Event";
+
       if (input.status === "Approved") {
-        console.log(`[EMAIL SIMULATION] Sending approval email to student ${existing.userId} for event ${existing.eventId}. Reference: ${existing.referenceNumber}`);
+        console.log(`[EMAIL SIMULATION] Sending approval email to student ${existing.userId} for event ${eventName}. Reference: ${existing.referenceNumber}. Status: Approved`);
       } else if (input.status === "Rejected") {
-        console.log(`[EMAIL SIMULATION] Sending rejection email to student ${existing.userId} for event ${existing.eventId}. Remarks: ${input.remarks || "No remarks provided"}`);
+        console.log(`[EMAIL SIMULATION] Sending rejection email to student ${existing.userId} for event ${eventName}. Reference: ${existing.referenceNumber}. Status: Rejected. Remarks: ${input.remarks || "No remarks provided"}`);
       }
 
       res.json(updated);
