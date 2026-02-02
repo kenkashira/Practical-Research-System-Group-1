@@ -44,15 +44,15 @@ export default function RegistrationDetailsPage() {
             <CardContent className="space-y-4">
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Event</label>
-                  <p className="font-medium uppercase">{typedReg.event?.title}</p>
+                  <p className="font-medium uppercase">{typedReg.event?.title || "N/A"}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Date</label>
-                  <p className="font-medium uppercase">{format(new Date(typedReg.event?.date), "MMMM d, yyyy h:mm a")}</p>
+                  <p className="font-medium uppercase">{typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy h:mm a") : "N/A"}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Venue</label>
-                  <p className="font-medium uppercase">{typedReg.event?.venue}</p>
+                  <p className="font-medium uppercase">{typedReg.event?.venue || "N/A"}</p>
                </div>
             </CardContent>
          </Card>
@@ -64,15 +64,18 @@ export default function RegistrationDetailsPage() {
             <CardContent className="space-y-4">
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Name</label>
-                  <p className="font-medium uppercase">{typedReg.user?.fullName}</p>
+                  <p className="font-medium uppercase">{typedReg.user?.fullName || typedReg.studentInfo?.fullName || "N/A"}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Grade / Section</label>
-                  <p className="font-medium uppercase">{typedReg.user?.grade} - {typedReg.user?.section} {typedReg.user?.strand ? `(${typedReg.user?.strand})` : ""}</p>
+                  <p className="font-medium uppercase">
+                    {typedReg.user?.grade || typedReg.studentInfo?.grade || "N/A"} - {typedReg.user?.section || typedReg.studentInfo?.section || "N/A"} 
+                    {(typedReg.user?.strand || typedReg.studentInfo?.strand) ? ` (${typedReg.user?.strand || typedReg.studentInfo?.strand})` : ""}
+                  </p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Contact</label>
-                  <p className="font-medium uppercase">{typedReg.user?.contactNumber || "N/A"}</p>
+                  <p className="font-medium uppercase">{typedReg.user?.contactNumber || typedReg.studentInfo?.contact || "N/A"}</p>
                </div>
             </CardContent>
          </Card>
