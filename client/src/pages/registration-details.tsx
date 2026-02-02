@@ -19,7 +19,23 @@ export default function RegistrationDetailsPage() {
   if (!reg) return <div>Registration not found</div>;
 
   const isAdmin = user?.role === "admin";
-  const typedReg = reg as any; // Temporary fix for inferred types during transition
+  const typedReg = reg as any;
+
+  // Ensure data is stacked by checking both profile data and snapshot data
+  const studentData = {
+    fullName: typedReg.user?.fullName || typedReg.studentInfo?.fullName || "N/A",
+    grade: typedReg.user?.grade || typedReg.studentInfo?.grade || "N/A",
+    section: typedReg.user?.section || typedReg.studentInfo?.section || "N/A",
+    strand: typedReg.user?.strand || typedReg.studentInfo?.strand || "N/A",
+    contact: typedReg.user?.contactNumber || typedReg.studentInfo?.contact || "N/A",
+    email: typedReg.user?.email || typedReg.studentInfo?.email || "N/A",
+  };
+
+  const eventData = {
+    title: typedReg.event?.title || "N/A",
+    date: typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy h:mm a") : "N/A",
+    venue: typedReg.event?.venue || "N/A",
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -44,15 +60,15 @@ export default function RegistrationDetailsPage() {
             <CardContent className="space-y-4">
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Event</label>
-                  <p className="font-medium uppercase">{typedReg.event?.title || "N/A"}</p>
+                  <p className="font-medium uppercase">{eventData.title}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Date</label>
-                  <p className="font-medium uppercase">{typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy h:mm a") : "N/A"}</p>
+                  <p className="font-medium uppercase">{eventData.date}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Venue</label>
-                  <p className="font-medium uppercase">{typedReg.event?.venue || "N/A"}</p>
+                  <p className="font-medium uppercase">{eventData.venue}</p>
                </div>
             </CardContent>
          </Card>
@@ -64,18 +80,18 @@ export default function RegistrationDetailsPage() {
             <CardContent className="space-y-4">
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Name</label>
-                  <p className="font-medium uppercase">{typedReg.user?.fullName || typedReg.studentInfo?.fullName || "N/A"}</p>
+                  <p className="font-medium uppercase">{studentData.fullName}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Grade / Section</label>
                   <p className="font-medium uppercase">
-                    {typedReg.user?.grade || typedReg.studentInfo?.grade || "N/A"} - {typedReg.user?.section || typedReg.studentInfo?.section || "N/A"} 
-                    {(typedReg.user?.strand || typedReg.studentInfo?.strand) ? ` (${typedReg.user?.strand || typedReg.studentInfo?.strand})` : ""}
+                    {studentData.grade} - {studentData.section} 
+                    {studentData.strand !== "N/A" ? ` (${studentData.strand})` : ""}
                   </p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Contact</label>
-                  <p className="font-medium uppercase">{typedReg.user?.contactNumber || typedReg.studentInfo?.contact || "N/A"}</p>
+                  <p className="font-medium uppercase">{studentData.contact}</p>
                </div>
             </CardContent>
          </Card>

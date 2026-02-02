@@ -72,11 +72,14 @@ export async function registerRoutes(
   app.patch("/api/user/profile", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const { email, contactNumber, password } = req.body;
+      const { email, contactNumber, password, grade, section, strand } = req.body;
       const updates: any = {};
       if (email !== undefined) updates.email = email;
       if (contactNumber !== undefined) updates.contactNumber = contactNumber;
       if (password !== undefined) updates.password = password;
+      if (grade !== undefined) updates.grade = grade;
+      if (section !== undefined) updates.section = section;
+      if (strand !== undefined) updates.strand = strand;
 
       const updated = await storage.updateUserProfile(req.user!.id, updates);
       res.json(updated);

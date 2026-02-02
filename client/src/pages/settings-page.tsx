@@ -14,6 +14,9 @@ import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
 const profileSchema = z.object({
   email: z.string().email("Invalid email address"),
   contactNumber: z.string().min(10, "Contact number too short"),
+  grade: z.string().min(1, "Grade is required"),
+  section: z.string().min(1, "Section is required"),
+  strand: z.string().optional().or(z.literal("")),
   password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
 });
 
@@ -28,12 +31,18 @@ export default function SettingsPage() {
     defaultValues: {
       email: user?.email || "",
       contactNumber: user?.contactNumber || "",
+      grade: user?.grade || "",
+      section: user?.section || "",
+      strand: user?.strand || "",
       password: "",
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (values: ProfileForm) => {
+      if (!confirm("Are you sure you want to update your profile information?")) {
+        throw new Error("Update cancelled");
+      }
       const payload = { ...values };
       if (!payload.password) delete payload.password;
       const res = await apiRequest("PATCH", "/api/user/profile", payload);
@@ -85,53 +94,87 @@ export default function SettingsPage() {
                   <label className="text-xs font-bold uppercase text-muted-foreground">Student ID / LRN</label>
                   <div className="p-3 bg-muted rounded-xl border border-border/50 font-medium font-mono">{user?.username}</div>
                 </div>
-                <div className="space-y-2 opacity-70">
-                  <label className="text-xs font-bold uppercase text-muted-foreground">Grade & Section</label>
-                  <div className="p-3 bg-muted rounded-xl border border-border/50 font-medium uppercase">{user?.grade} - {user?.section}</div>
-                </div>
-                {user?.strand && user.strand !== "N/A" && (
-                  <div className="space-y-2 opacity-70">
-                    <label className="text-xs font-bold uppercase text-muted-foreground">Strand</label>
-                    <div className="p-3 bg-muted rounded-xl border border-border/50 font-medium uppercase">{user?.strand}</div>
-                  </div>
-                )}
               </div>
 
               <div className="h-px bg-border/50 my-6" />
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase font-bold text-xs">Email Address</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input {...field} className="pl-10 rounded-xl bg-slate-50 border-border/50" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="grade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Grade</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="rounded-xl bg-slate-50 border-border/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="section"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Section</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="rounded-xl bg-slate-50 border-border/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="strand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Strand (Optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} value={field.value || ""} className="rounded-xl bg-slate-50 border-border/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-              <FormField
-                control={form.control}
-                name="contactNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="uppercase font-bold text-xs">Contact Number</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input {...field} className="pl-10 rounded-xl bg-slate-50 border-border/50" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Email Address</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input {...field} className="pl-10 rounded-xl bg-slate-50 border-border/50" />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="contactNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Contact Number</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input {...field} className="pl-10 rounded-xl bg-slate-50 border-border/50" />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}

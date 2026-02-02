@@ -103,8 +103,10 @@ export class DatabaseStorage implements IStorage {
       throw new Error("You are already registered for this event");
     }
 
-    // Generate a random reference number
-    const referenceNumber = Math.random().toString(36).substring(2, 10).toUpperCase();
+    // Generate a uniform reference number: AAIS-YEAR-RANDOM
+    const year = new Date().getFullYear();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const referenceNumber = `AAIS-${year}-${random}`;
     
     const [newReg] = await db.insert(registrations).values({
       ...registration,
