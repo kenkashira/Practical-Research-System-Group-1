@@ -41,9 +41,7 @@ export default function AdminDashboard() {
   });
 
   const onSubmitEvent = async (data: z.infer<typeof insertEventSchema>) => {
-    // Manually handle date strings for the demo or use date picker component
-    // Assuming simple text input for dates for MVP speed
-    // Ideally use a DatePicker component
+    // Standardize to Date objects for validation, though z.coerce.date() in schema handles string inputs too
     await createEvent({
         ...data,
         date: new Date(data.date), 

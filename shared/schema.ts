@@ -58,7 +58,10 @@ export const session = pgTable("session", {
 
 // Zod Schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });
-export const insertEventSchema = createInsertSchema(events).omit({ id: true });
+export const insertEventSchema = createInsertSchema(events, {
+  date: z.coerce.date(),
+  deadline: z.coerce.date(),
+}).omit({ id: true });
 export const insertRegistrationSchema = createInsertSchema(registrations).omit({ 
   id: true, 
   referenceNumber: true, 

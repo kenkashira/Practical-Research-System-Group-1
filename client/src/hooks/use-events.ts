@@ -57,13 +57,20 @@ export function useCreateEvent() {
     mutationFn: async (data: InsertEvent) => {
       // Ensure numeric fee
       const payload = { ...data, fee: Number(data.fee) };
+      // Zod schema expects Date objects for date/deadline fields
+      // But we need to be careful about JSON serialization if api.events.create.input.parse is used
+      // Let's check shared/schema.ts and shared/routes.ts
       const validated = api.events.create.input.parse(payload);
+      
       const res = await fetch(api.events.create.path, {
         method: api.events.create.method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(validated),
       });
-      if (!res.ok) throw new Error("Failed to create event");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create event");
+      }
       return api.events.create.responses[201].parse(await res.json());
     },
     onSuccess: () => {
