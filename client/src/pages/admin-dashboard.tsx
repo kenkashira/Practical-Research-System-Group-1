@@ -184,15 +184,15 @@ export default function AdminDashboard() {
                                 {uploadingImage ? (
                                   <Loader2 className="w-6 h-6 animate-spin text-primary" />
                                 ) : field.value ? (
-                                  <>
+                                  <div className="flex flex-col items-center gap-2">
                                     <ImageIcon className="w-6 h-6 text-primary" />
                                     <span className="text-[10px] uppercase font-bold text-primary">Change Poster</span>
-                                  </>
+                                  </div>
                                 ) : (
-                                  <>
+                                  <div className="flex flex-col items-center gap-2">
                                     <Upload className="w-6 h-6 text-muted-foreground" />
                                     <span className="text-[10px] uppercase font-bold text-muted-foreground">Upload Event Poster</span>
-                                  </>
+                                  </div>
                                 )}
                               </Button>
                               <input

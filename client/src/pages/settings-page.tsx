@@ -110,7 +110,7 @@ export default function SettingsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase font-bold text-xs">Grade</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger className="rounded-xl bg-slate-50 border-border/50">
                             <SelectValue placeholder="Select Grade" />
@@ -145,7 +145,7 @@ export default function SettingsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase font-bold text-xs">Strand</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || "N/A"}>
                         <FormControl>
                           <SelectTrigger className="rounded-xl bg-slate-50 border-border/50">
                             <SelectValue placeholder="Select Strand" />
