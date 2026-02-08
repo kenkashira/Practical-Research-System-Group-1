@@ -13,7 +13,7 @@ import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const GRADES = ["GRADE 7", "GRADE 8", "GRADE 9", "GRADE 10", "GRADE 11", "GRADE 12"];
-const STRANDS = ["STEM", "HUMSS", "ABM", "ICT", "GAS", "N/A"];
+const STRANDS = ["STEM", "HUMSS", "ABM", "ICT", "GAS"];
 
 const profileSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -22,6 +22,15 @@ const profileSchema = z.object({
   section: z.string().min(1, "Section is required"),
   strand: z.string().optional().or(z.literal("")),
   password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  const gradeLevel = parseInt(data.grade.replace(/\D/g, ""));
+  if (gradeLevel >= 11 && !data.strand) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Strand is required for Grade 11 and 12",
+      path: ["strand"],
+    });
+  }
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -42,12 +51,16 @@ export default function SettingsPage() {
     },
   });
 
+  const selectedGrade = form.watch("grade");
+  const isSeniorHigh = selectedGrade && parseInt(selectedGrade.replace(/\D/g, "")) >= 11;
+
   const mutation = useMutation({
     mutationFn: async (values: ProfileForm) => {
       if (!confirm("Are you sure you want to update your profile information?")) {
         throw new Error("Update cancelled");
       }
       const payload = { ...values };
+      if (!isSeniorHigh) payload.strand = "N/A";
       if (!payload.password) delete payload.password;
       const res = await apiRequest("PATCH", "/api/user/profile", payload);
       return res.json();
@@ -139,28 +152,30 @@ export default function SettingsPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="strand"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase font-bold text-xs">Strand</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || "N/A"}>
-                        <FormControl>
-                          <SelectTrigger className="rounded-xl bg-slate-50 border-border/50">
-                            <SelectValue placeholder="Select Strand" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {STRANDS.map((strand) => (
-                            <SelectItem key={strand} value={strand}>{strand}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {isSeniorHigh && (
+                  <FormField
+                    control={form.control}
+                    name="strand"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="uppercase font-bold text-xs">Strand</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                          <FormControl>
+                            <SelectTrigger className="rounded-xl bg-slate-50 border-border/50">
+                              <SelectValue placeholder="Select Strand" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {STRANDS.map((strand) => (
+                              <SelectItem key={strand} value={strand}>{strand}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
