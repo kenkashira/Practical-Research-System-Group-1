@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useEvents, useCreateEvent } from "@/hooks/use-events";
 import { useRegistrations, useUpdateRegistration } from "@/hooks/use-registrations";
-import { Loader2, Plus, Calendar, Users, Filter, Check, X, Search } from "lucide-react";
+import { Loader2, Plus, Calendar, Users, Filter, Check, X, Search, Upload, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -18,6 +18,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
 
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("Pending");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const eventForm = useForm<z.infer<typeof insertEventSchema>>({
     resolver: zodResolver(insertEventSchema),
@@ -39,6 +41,32 @@ export default function AdminDashboard() {
        imageUrl: "",
     }
   });
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const res = await apiRequest("POST", "/api/uploads/request-url", {
+        filename: file.name,
+        fileType: file.type,
+      });
+      const { uploadUrl, publicUrl } = await res.json();
+
+      await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      eventForm.setValue("imageUrl", publicUrl);
+    } catch (err) {
+      console.error("Upload failed:", err);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const onSubmitEvent = async (data: z.infer<typeof insertEventSchema>) => {
     // Standardize to Date objects for validation, though z.coerce.date() in schema handles string inputs too
@@ -142,8 +170,56 @@ export default function AdminDashboard() {
                     name="imageUrl"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="uppercase font-bold text-xs">Image URL (Optional)</FormLabel>
-                        <FormControl><Input placeholder="https://..." {...field} value={field.value || ''} className="rounded-xl" /></FormControl>
+                        <FormLabel className="uppercase font-bold text-xs">Event Poster</FormLabel>
+                        <FormControl>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-4">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full h-24 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors"
+                                onClick={() => document.getElementById('event-image-upload')?.click()}
+                                disabled={uploadingImage}
+                              >
+                                {uploadingImage ? (
+                                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                ) : field.value ? (
+                                  <>
+                                    <ImageIcon className="w-6 h-6 text-primary" />
+                                    <span className="text-[10px] uppercase font-bold text-primary">Change Poster</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload className="w-6 h-6 text-muted-foreground" />
+                                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Upload Event Poster</span>
+                                  </>
+                                )}
+                              </Button>
+                              <input
+                                id="event-image-upload"
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                              />
+                            </div>
+                            {field.value && (
+                              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border">
+                                <img src={field.value} alt="Preview" className="w-full h-full object-cover" />
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="destructive"
+                                  className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                                  onClick={() => field.onChange("")}
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
                         </FormItem>
                     )}
                 />

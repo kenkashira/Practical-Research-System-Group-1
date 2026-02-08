@@ -10,6 +10,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Loader2, User, Mail, Phone, Lock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const GRADES = ["GRADE 7", "GRADE 8", "GRADE 9", "GRADE 10", "GRADE 11", "GRADE 12"];
+const STRANDS = ["STEM", "HUMSS", "ABM", "ICT", "GAS", "N/A"];
 
 const profileSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -57,6 +61,7 @@ export default function SettingsPage() {
       form.reset({ ...form.getValues(), password: "" });
     },
     onError: (error: Error) => {
+      if (error.message === "Update cancelled") return;
       toast({
         title: "Update Failed",
         description: error.message,
@@ -105,9 +110,18 @@ export default function SettingsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase font-bold text-xs">Grade</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="rounded-xl bg-slate-50 border-border/50" />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-xl bg-slate-50 border-border/50">
+                            <SelectValue placeholder="Select Grade" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {GRADES.map((grade) => (
+                            <SelectItem key={grade} value={grade}>{grade}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -130,10 +144,19 @@ export default function SettingsPage() {
                   name="strand"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="uppercase font-bold text-xs">Strand (Optional)</FormLabel>
-                      <FormControl>
-                        <Input {...field} value={field.value || ""} className="rounded-xl bg-slate-50 border-border/50" />
-                      </FormControl>
+                      <FormLabel className="uppercase font-bold text-xs">Strand</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="rounded-xl bg-slate-50 border-border/50">
+                            <SelectValue placeholder="Select Strand" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {STRANDS.map((strand) => (
+                            <SelectItem key={strand} value={strand}>{strand}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
