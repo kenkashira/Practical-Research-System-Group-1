@@ -13,6 +13,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
+import schoolBg from "@assets/image_1771555667479.png";
+
 const loginSchema = z.object({
   username: z.string().regex(/^\d+$/, "LRN must be numbers only"),
   password: z.string().min(1, "Password is required"),
@@ -58,22 +60,25 @@ export default function AuthPage() {
     <div className="min-h-screen grid lg:grid-cols-2 bg-slate-50">
       {/* Left: Branding */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-primary text-primary-foreground relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-10 mix-blend-overlay" />
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay" 
+          style={{ backgroundImage: `url(${schoolBg})` }}
+        />
         <div className="relative z-10">
           <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-2xl">
             <span className="font-display font-bold text-3xl">A</span>
           </div>
           <h1 className="font-display text-5xl font-bold leading-tight mb-6">
             Army's Angels <br />
-            <span className="text-secondary uppercase">INTEGRATED SCHOOL</span>
+            <span className="text-secondary uppercase">INTEGRATED SCHOOL, INC.</span>
           </h1>
-          <p className="text-lg text-primary-foreground/80 max-w-md">
+          <p className="text-lg text-primary-foreground/90 max-w-md font-medium">
             Welcome to the official event portal. Register for upcoming events, submit requirements, and track your applications.
           </p>
         </div>
         
-        <div className="relative z-10 flex gap-4 text-sm text-primary-foreground/60">
-          <span>© 2024 ARMY'S ANGELS</span>
+        <div className="relative z-10 flex gap-4 text-sm text-primary-foreground/80 font-medium">
+          <span>© 2024 ARMY'S ANGELS, INC.</span>
           <span>•</span>
           <span>PRIVACY POLICY</span>
         </div>
