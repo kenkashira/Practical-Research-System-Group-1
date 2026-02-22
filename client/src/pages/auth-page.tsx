@@ -15,6 +15,9 @@ import { motion } from "framer-motion";
 
 import schoolBg from "@assets/image_1771555667479.png";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+
 const loginSchema = z.object({
   username: z.string().regex(/^\d+$/, "LRN must be numbers only"),
   password: z.string().min(1, "Password is required"),
@@ -24,6 +27,8 @@ export default function AuthPage() {
   const { user, login, register, isLoggingIn, isRegistering } = useAuth();
   const [activeTab, setActiveTab] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
+
+  const { toast } = useToast();
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -46,10 +51,20 @@ export default function AuthPage() {
   });
 
   const onRegister = async (data: z.infer<typeof insertUserSchema>) => {
-    await register(data);
-    // Automatic login is handled by the hook if it updates state, 
-    // but the user wants to be moved to login area or gone.
-    // The redirect happens automatically because 'user' state changes.
+    try {
+      await register(data);
+      toast({
+        title: "Registration Successful",
+        description: "Your account has been created. Please log in to continue.",
+      });
+      setActiveTab("login");
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (user) {
@@ -77,8 +92,8 @@ export default function AuthPage() {
           </p>
         </div>
         
-        <div className="relative z-10 flex gap-4 text-sm text-primary-foreground/80 font-medium">
-          <span>© 2024 ARMY'S ANGELS, INC.</span>
+        <div className="relative z-10 flex gap-4 text-sm text-primary-foreground/80 font-medium uppercase">
+          <span>© ARMY'S ANGELS, INC.</span>
           <span>•</span>
           <span>PRIVACY POLICY</span>
         </div>
@@ -192,47 +207,73 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            control={registerForm.control}
-                            name="grade"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="uppercase">GRADE</FormLabel>
-                                <FormControl>
-                              <Input placeholder="11" {...field} value={field.value || ""} />
-                            </FormControl>
-                                <FormMessage />
-                            </FormItem>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <FormField
+                                control={registerForm.control}
+                                name="grade"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase">GRADE</FormLabel>
+                                    <Select 
+                                      onValueChange={field.onChange} 
+                                      value={field.value || ""}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-muted/30">
+                                          <SelectValue placeholder="Select Grade" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {[7, 8, 9, 10, 11, 12].map((g) => (
+                                          <SelectItem key={g} value={g.toString()}>Grade {g}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            {parseInt(registerForm.watch("grade")) >= 11 && (
+                              <FormField
+                                control={registerForm.control}
+                                name="strand"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase">STRAND</FormLabel>
+                                    <Select 
+                                      onValueChange={field.onChange} 
+                                      value={field.value || ""}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="bg-muted/30">
+                                          <SelectValue placeholder="Select Strand" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {["STEM", "ICT", "ABM", "HUMSS", "GAS"].map((s) => (
+                                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                              />
                             )}
-                        />
-                         <FormField
-                            control={registerForm.control}
-                            name="section"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="uppercase">SECTION</FormLabel>
-                                <FormControl>
-                              <Input placeholder="RIZAL" {...field} value={field.value || ""} />
-                            </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                            )}
-                        />
-                      </div>
-                      <FormField
-                          control={registerForm.control}
-                          name="strand"
-                          render={({ field }) => (
-                          <FormItem>
-                              <FormLabel className="uppercase">STRAND (OPTIONAL)</FormLabel>
-                              <FormControl>
-                              <Input placeholder="STEM" {...field} value={field.value || ""} />
-                              </FormControl>
-                              <FormMessage />
-                          </FormItem>
-                          )}
-                      />
+                             <FormField
+                                control={registerForm.control}
+                                name="section"
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="uppercase">SECTION</FormLabel>
+                                    <FormControl>
+                                  <Input placeholder="RIZAL" {...field} value={field.value || ""} className="bg-muted/30" />
+                                </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                          </div>
                       <FormField
                           control={registerForm.control}
                           name="password"
