@@ -129,6 +129,7 @@ export default function AdminDashboard() {
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Date & Time</FormLabel>
                         <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} className="rounded-xl" /></FormControl>
+                        <FormMessage />
                         </FormItem>
                     )}
                     />
@@ -139,6 +140,7 @@ export default function AdminDashboard() {
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Venue</FormLabel>
                         <FormControl><Input {...field} className="rounded-xl" /></FormControl>
+                        <FormMessage />
                         </FormItem>
                     )}
                     />
@@ -151,6 +153,7 @@ export default function AdminDashboard() {
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Fee (PHP)</FormLabel>
                         <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} className="rounded-xl" /></FormControl>
+                        <FormMessage />
                         </FormItem>
                     )}
                     />
@@ -161,6 +164,7 @@ export default function AdminDashboard() {
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Deadline</FormLabel>
                         <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} className="rounded-xl" /></FormControl>
+                        <FormMessage />
                         </FormItem>
                     )}
                     />
@@ -296,11 +300,11 @@ export default function AdminDashboard() {
                       <TableCell className="font-mono text-xs">{reg.referenceNumber}</TableCell>
                       <TableCell>
                         <div className="font-medium uppercase">{reg.user?.fullName}</div>
-                        <div className="text-xs text-muted-foreground uppercase">{reg.user?.grade} - {reg.user?.section} {reg.user?.strand ? `(${reg.user?.strand})` : ""}</div>
+                        <div className="text-xs text-muted-foreground uppercase">{reg.user?.grade} - {reg.user?.strand ? `${reg.user?.strand} - ` : ""}{reg.user?.section}</div>
                       </TableCell>
                       <TableCell>{reg.event?.title}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {format(new Date(reg.createdAt), "MMM d, yyyy")}
+                        {format(new Date(reg.createdAt), "MMMM d, yyyy")}
                       </TableCell>
                       <TableCell><StatusBadge status={reg.status} /></TableCell>
                       <TableCell className="text-right">

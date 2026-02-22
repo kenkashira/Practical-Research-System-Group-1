@@ -36,7 +36,7 @@ export function EventCard({ event, isAdmin }: EventCardProps) {
                 {format(new Date(event.date), "dd")}
              </div>
              <div className="text-sm font-medium uppercase tracking-wider opacity-90 drop-shadow-sm">
-                {format(new Date(event.date), "MMM yyyy")}
+                {format(new Date(event.date), "MMM d, yyyy")}
              </div>
           </div>
         </div>

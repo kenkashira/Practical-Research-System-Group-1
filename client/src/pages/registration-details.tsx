@@ -83,11 +83,18 @@ export default function RegistrationDetailsPage() {
                   <p className="font-medium uppercase">{studentData.fullName}</p>
                </div>
                <div>
-                  <label className="text-xs text-muted-foreground uppercase font-bold">Grade / Section</label>
-                  <p className="font-medium uppercase">
-                    {studentData.grade} - {studentData.section} 
-                    {studentData.strand !== "N/A" ? ` (${studentData.strand})` : ""}
-                  </p>
+                  <label className="text-xs text-muted-foreground uppercase font-bold">Grade</label>
+                  <p className="font-medium uppercase">{studentData.grade}</p>
+               </div>
+               {studentData.strand !== "N/A" && (
+                 <div>
+                    <label className="text-xs text-muted-foreground uppercase font-bold">Strand</label>
+                    <p className="font-medium uppercase">{studentData.strand}</p>
+                 </div>
+               )}
+               <div>
+                  <label className="text-xs text-muted-foreground uppercase font-bold">Section</label>
+                  <p className="font-medium uppercase">{studentData.section}</p>
                </div>
                <div>
                   <label className="text-xs text-muted-foreground uppercase font-bold">Contact</label>

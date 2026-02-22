@@ -139,25 +139,12 @@ export default function SettingsPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="section"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase font-bold text-xs">Section</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="rounded-xl bg-slate-50 border-border/50" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 {isSeniorHigh && (
                   <FormField
                     control={form.control}
                     name="strand"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="md:col-span-2">
                         <FormLabel className="uppercase font-bold text-xs">Strand</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value || ""}>
                           <FormControl>
@@ -176,6 +163,19 @@ export default function SettingsPage() {
                     )}
                   />
                 )}
+                <FormField
+                  control={form.control}
+                  name="section"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Section</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="rounded-xl bg-slate-50 border-border/50" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">

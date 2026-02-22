@@ -209,7 +209,7 @@ export default function EventDetailsPage() {
           <div className="p-6 pt-2">
             {step === 1 && (
                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
-                 <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase text-muted-foreground">Full Name</label>
                       <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.fullName}</div>
@@ -219,8 +219,18 @@ export default function EventDetailsPage() {
                       <div className="p-2.5 bg-muted rounded-lg text-sm font-mono opacity-70 border border-border/50">{user?.username}</div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Grade & Section</label>
-                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.grade} - {user?.section}</div>
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Grade</label>
+                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.grade}</div>
+                    </div>
+                    {user?.strand && user?.strand !== "N/A" && (
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Strand</label>
+                        <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.strand}</div>
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Section</label>
+                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.section}</div>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase text-muted-foreground">Email Address</label>
@@ -229,7 +239,7 @@ export default function EventDetailsPage() {
                         <span className="truncate">{user?.email}</span>
                       </div>
                     </div>
-                 </div>
+                  </div>
                  <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex items-start gap-3">
                     <div className="p-1.5 bg-white rounded-md text-primary shadow-sm">
                       <User className="w-3.5 h-3.5" />

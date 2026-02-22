@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 
 const loginSchema = z.object({
-  username: z.string().regex(/^\d+$/, "LRN must be numbers only"),
+  username: z.string().length(12, "LRN must be exactly 12 digits").regex(/^\d+$/, "LRN must be numbers only"),
   password: z.string().min(1, "Password is required"),
 });
 

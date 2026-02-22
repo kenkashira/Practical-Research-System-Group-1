@@ -57,7 +57,9 @@ export const session = pgTable("session", {
 });
 
 // Zod Schemas
-export const insertUserSchema = createInsertSchema(users).omit({ id: true });
+export const insertUserSchema = createInsertSchema(users, {
+  username: z.string().length(12, "LRN must be exactly 12 digits").regex(/^\d+$/, "LRN must be numbers only"),
+}).omit({ id: true });
 export const insertEventSchema = createInsertSchema(events, {
   date: z.coerce.date(),
   deadline: z.coerce.date(),
