@@ -52,7 +52,7 @@ export function EventCard({ event, isAdmin }: EventCardProps) {
           <div className="space-y-2 mt-auto">
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="w-4 h-4 mr-2 text-primary" />
-              {format(new Date(event.date), "EEEE, h:mm a")}
+              {format(new Date(event.date), "MMMM d, yyyy h:mm a")}
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="w-4 h-4 mr-2 text-secondary" />
