@@ -73,9 +73,19 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async getRegistration(id: number): Promise<Registration | undefined> {
-    const [registration] = await db.select().from(registrations).where(eq(registrations.id, id));
-    return registration;
+  async getRegistration(id: number): Promise<(Registration & { event: Event, user: User }) | undefined> {
+    const [result] = await db.select().from(registrations)
+      .innerJoin(events, eq(registrations.eventId, events.id))
+      .innerJoin(users, eq(registrations.userId, users.id))
+      .where(eq(registrations.id, id));
+    
+    if (!result) return undefined;
+
+    return {
+      ...result.registrations,
+      event: result.events,
+      user: result.users
+    };
   }
 
   async getRegistrationsByUser(userId: number): Promise<(Registration & { event: Event })[]> {
