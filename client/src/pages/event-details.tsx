@@ -143,8 +143,8 @@ export default function EventDetailsPage() {
               <div className="flex items-start">
                 <Clock className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Time</p>
-                  <p className="font-semibold">{format(new Date(event.date), "h:mm a")}</p>
+                  <p className="text-sm font-medium text-muted-foreground uppercase">Deadline</p>
+                  <p className="font-semibold">{format(new Date(event.deadline), "MMMM d, yyyy h:mm a")}</p>
                 </div>
               </div>
               <div className="flex items-start">

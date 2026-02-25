@@ -128,7 +128,18 @@ export default function AdminDashboard() {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Date & Time</FormLabel>
-                        <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} className="rounded-xl" /></FormControl>
+                        <FormControl>
+                          <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                            <Input 
+                              type="datetime-local" 
+                              {...field} 
+                              value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} 
+                              onChange={e => field.onChange(new Date(e.target.value))} 
+                              className="rounded-xl pl-10" 
+                            />
+                          </div>
+                        </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -163,7 +174,18 @@ export default function AdminDashboard() {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Deadline</FormLabel>
-                        <FormControl><Input type="datetime-local" {...field} value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} onChange={e => field.onChange(new Date(e.target.value))} className="rounded-xl" /></FormControl>
+                        <FormControl>
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                            <Input 
+                              type="datetime-local" 
+                              {...field} 
+                              value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} 
+                              onChange={e => field.onChange(new Date(e.target.value))} 
+                              className="rounded-xl pl-10" 
+                            />
+                          </div>
+                        </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
