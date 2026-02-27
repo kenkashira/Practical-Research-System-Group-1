@@ -220,7 +220,13 @@ export default function AuthPage() {
                           <FormItem>
                             <FormLabel className="uppercase">FULL NAME</FormLabel>
                             <FormControl>
-                              <Input placeholder="JOHN DOE" {...field} />
+                              <Input 
+                                placeholder="JOHN DOE" 
+                                {...field} 
+                                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                                className="uppercase"
+                                maxLength={100}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -286,7 +292,13 @@ export default function AuthPage() {
                                 <FormItem>
                                     <FormLabel className="uppercase">SECTION</FormLabel>
                                     <FormControl>
-                                  <Input placeholder="RIZAL" {...field} value={field.value || ""} className="bg-muted/30" />
+                                  <Input 
+                                    placeholder="RIZAL" 
+                                    {...field} 
+                                    value={field.value || ""} 
+                                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                                    className="bg-muted/30 uppercase" 
+                                  />
                                 </FormControl>
                                     <FormMessage />
                                 </FormItem>

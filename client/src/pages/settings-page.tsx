@@ -170,7 +170,11 @@ export default function SettingsPage() {
                     <FormItem>
                       <FormLabel className="uppercase font-bold text-xs">Section</FormLabel>
                       <FormControl>
-                        <Input {...field} className="rounded-xl bg-slate-50 border-border/50" />
+                        <Input 
+                          {...field} 
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          className="rounded-xl bg-slate-50 border-border/50 uppercase" 
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
