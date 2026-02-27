@@ -85,7 +85,7 @@ export default function AuthPage() {
           </div>
           <h1 className="font-display text-5xl font-bold leading-tight mb-6">
             Army's Angels <br />
-            <span className="text-secondary uppercase">INTEGRATED SCHOOL, INC.</span>
+            <span className="text-secondary">Integrated School, Inc.</span>
           </h1>
           <p className="text-lg text-primary-foreground/90 max-w-md font-medium">
             Welcome to the official event portal. Register for upcoming events, submit requirements, and track your applications.
@@ -133,7 +133,17 @@ export default function AuthPage() {
                           <FormItem>
                             <FormLabel className="uppercase">LRN</FormLabel>
                             <FormControl>
-                              <Input placeholder="12345678" {...field} className="bg-muted/30" type="number" />
+                              <Input 
+                                placeholder="123456789012" 
+                                {...field} 
+                                className="bg-muted/30" 
+                                type="text"
+                                maxLength={12}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                                  field.onChange(val);
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -188,7 +198,16 @@ export default function AuthPage() {
                           <FormItem>
                             <FormLabel className="uppercase">LRN</FormLabel>
                             <FormControl>
-                              <Input placeholder="12345678" {...field} type="number" />
+                              <Input 
+                                placeholder="123456789012" 
+                                {...field} 
+                                type="text"
+                                maxLength={12}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                                  field.onChange(val);
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
