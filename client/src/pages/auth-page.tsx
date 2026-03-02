@@ -191,40 +191,41 @@ export default function AuthPage() {
                 <CardContent>
                    <Form {...registerForm}>
                     <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="uppercase">LRN</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="123456789012" 
-                                {...field} 
-                                type="text"
-                                maxLength={12}
-                                onChange={(e) => {
-                                  const val = e.target.value.replace(/\D/g, '').slice(0, 12);
-                                  field.onChange(val);
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          <FormField
+                            control={registerForm.control}
+                            name="username"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="uppercase font-bold text-xs">Student ID / LRN (12 Digits)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    placeholder="000000000000" 
+                                    {...field} 
+                                    type="text"
+                                    maxLength={12}
+                                    onChange={(e) => {
+                                      const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                                      field.onChange(val);
+                                    }}
+                                    className="bg-muted/30 font-mono rounded-xl"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                       <FormField
                         control={registerForm.control}
                         name="fullName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="uppercase">FULL NAME</FormLabel>
+                            <FormLabel className="uppercase font-bold text-xs">Full Name</FormLabel>
                             <FormControl>
                               <Input 
-                                placeholder="JOHN DOE" 
+                                placeholder="JUAN DELA CRUZ" 
                                 {...field} 
                                 onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                className="uppercase"
+                                className="uppercase rounded-xl"
                                 maxLength={100}
                               />
                             </FormControl>
@@ -238,13 +239,20 @@ export default function AuthPage() {
                                 name="grade"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="uppercase">GRADE</FormLabel>
+                                    <FormLabel className="uppercase font-bold text-xs">Grade</FormLabel>
                                     <Select 
-                                      onValueChange={field.onChange} 
+                                      onValueChange={(val) => {
+                                        field.onChange(val);
+                                        if (parseInt(val) < 11) {
+                                          registerForm.setValue("strand", "N/A");
+                                        } else {
+                                          registerForm.setValue("strand", "");
+                                        }
+                                      }} 
                                       value={field.value || ""}
                                     >
                                       <FormControl>
-                                        <SelectTrigger className="bg-muted/30">
+                                        <SelectTrigger className="bg-muted/30 rounded-xl">
                                           <SelectValue placeholder="Select Grade" />
                                         </SelectTrigger>
                                       </FormControl>
@@ -264,13 +272,13 @@ export default function AuthPage() {
                                 name="strand"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="uppercase">STRAND</FormLabel>
+                                    <FormLabel className="uppercase font-bold text-xs">Strand</FormLabel>
                                     <Select 
                                       onValueChange={field.onChange} 
                                       value={field.value || ""}
                                     >
                                       <FormControl>
-                                        <SelectTrigger className="bg-muted/30">
+                                        <SelectTrigger className="bg-muted/30 rounded-xl">
                                           <SelectValue placeholder="Select Strand" />
                                         </SelectTrigger>
                                       </FormControl>
@@ -290,14 +298,14 @@ export default function AuthPage() {
                                 name="section"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="uppercase">SECTION</FormLabel>
+                                    <FormLabel className="uppercase font-bold text-xs">Section</FormLabel>
                                     <FormControl>
                                   <Input 
-                                    placeholder="RIZAL" 
+                                    placeholder="SECTION NAME" 
                                     {...field} 
                                     value={field.value || ""} 
                                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                                    className="bg-muted/30 uppercase" 
+                                    className="bg-muted/30 uppercase rounded-xl" 
                                   />
                                 </FormControl>
                                     <FormMessage />
@@ -310,10 +318,10 @@ export default function AuthPage() {
                           name="password"
                           render={({ field }) => (
                           <FormItem>
-                              <FormLabel className="uppercase">PASSWORD</FormLabel>
+                              <FormLabel className="uppercase font-bold text-xs">Password</FormLabel>
                               <FormControl>
                                 <div className="relative">
-                                  <Input type={showPassword ? "text" : "password"} {...field} className="pr-10" />
+                                  <Input type={showPassword ? "text" : "password"} {...field} className="pr-10 rounded-xl" />
                                   <Button
                                     type="button"
                                     variant="ghost"
@@ -328,6 +336,42 @@ export default function AuthPage() {
                               <FormMessage />
                           </FormItem>
                           )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="uppercase font-bold text-xs">Email Address</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="student@example.com" 
+                                {...field} 
+                                className="bg-muted/30 rounded-xl" 
+                                type="email"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="contactNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="uppercase font-bold text-xs">Contact Number</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="09123456789" 
+                                {...field} 
+                                className="bg-muted/30 rounded-xl" 
+                                type="tel"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                       <Button type="submit" className="w-full py-6 font-semibold shadow-lg shadow-primary/20 uppercase" disabled={isRegistering}>
                         {isRegistering ? <Loader2 className="animate-spin" /> : "CREATE ACCOUNT"}

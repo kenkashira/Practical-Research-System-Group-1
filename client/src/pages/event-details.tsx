@@ -2,7 +2,7 @@ import { useEvent } from "@/hooks/use-events";
 import { useRegistrations, useCreateRegistration } from "@/hooks/use-registrations";
 import { useAuth } from "@/hooks/use-auth";
 import { useRoute, useLocation, Link } from "wouter";
-import { Loader2, Calendar, MapPin, Clock, ArrowLeft, CheckCircle2, FileUp, Mail, User, ShieldCheck } from "lucide-react";
+import { Loader2, Calendar, MapPin, Clock, ArrowLeft, CheckCircle2, FileUp, Mail, User, ShieldCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +93,8 @@ export default function EventDetailsPage() {
   const nextStep = () => setStep(s => s + 1);
   const prevStep = () => setStep(s => s - 1);
 
+  const isPastAppointment = event.appointmentDeadline && new Date() > new Date(event.appointmentDeadline);
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <Button variant="ghost" className="pl-0 hover:bg-transparent hover:text-primary mb-4" onClick={() => window.history.back()}>
@@ -110,22 +112,22 @@ export default function EventDetailsPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="absolute bottom-0 left-0 p-8 text-white">
             <div className="flex gap-2 mb-4">
-              <Badge className="bg-primary hover:bg-primary text-white border-none">Event</Badge>
+              <Badge className="bg-primary hover:bg-primary text-white border-none uppercase font-bold">Event</Badge>
               {event.fee === 0 ? (
-                <Badge variant="secondary" className="text-secondary-foreground font-bold">Free</Badge>
+                <Badge variant="secondary" className="text-secondary-foreground font-bold uppercase">Free</Badge>
               ) : (
-                <Badge variant="secondary" className="text-secondary-foreground font-bold">PHP {event.fee}</Badge>
+                <Badge variant="secondary" className="text-secondary-foreground font-bold uppercase">PHP {event.fee}</Badge>
               )}
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold mb-2 shadow-sm">{event.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-2 shadow-sm uppercase">{event.title}</h1>
           </div>
         </div>
 
         <div className="p-8 grid md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-6">
             <div>
-              <h3 className="text-lg font-bold font-display mb-2 text-primary">About this Event</h3>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+              <h3 className="text-lg font-bold font-display mb-2 text-primary uppercase">About this Event</h3>
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line uppercase">
                 {event.description}
               </p>
             </div>
@@ -136,22 +138,22 @@ export default function EventDetailsPage() {
               <div className="flex items-start">
                 <Calendar className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Date</p>
-                  <p className="font-semibold">{format(new Date(event.date), "MMMM d, yyyy")}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Date</p>
+                  <p className="font-bold uppercase">{format(new Date(event.date), "MMMM d, yyyy")}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <Clock className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground uppercase">Deadline</p>
-                  <p className="font-semibold">{format(new Date(event.deadline), "MMMM d, yyyy h:mm a")}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Payment Deadline</p>
+                  <p className="font-bold uppercase">{format(new Date(event.deadline), "MMMM d, yyyy")}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <MapPin className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Venue</p>
-                  <p className="font-semibold">{event.venue}</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase">Venue</p>
+                  <p className="font-bold uppercase">{event.venue}</p>
                 </div>
               </div>
             </div>
@@ -159,15 +161,20 @@ export default function EventDetailsPage() {
             {existingRegistration && existingRegistration.stage === 4 ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
                  <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                 <p className="text-green-800 font-semibold">You are registered!</p>
+                 <p className="text-green-800 font-bold uppercase text-sm">You are registered!</p>
                  <Link href={`/registrations/${existingRegistration.id}`}>
-                    <Button variant="outline" className="text-green-700 mt-2">View Status</Button>
+                    <Button variant="outline" className="text-green-700 mt-2 uppercase font-bold text-xs">View Status</Button>
                  </Link>
+              </div>
+            ) : isPastAppointment ? (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                <XCircle className="w-8 h-8 text-red-600 mx-auto mb-2" />
+                <p className="text-red-800 font-bold uppercase text-xs">Registration Period Ended</p>
               </div>
             ) : (
               <Button 
                 size="lg" 
-                className="w-full text-lg font-semibold shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all uppercase"
+                className="w-full text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all uppercase h-14 rounded-2xl"
                 onClick={() => setIsWizardOpen(true)}
               >
                 {isStarted ? "Continue Registration" : "Register Now"}

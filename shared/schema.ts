@@ -21,8 +21,9 @@ export const events = pgTable("events", {
   description: text("description").notNull(),
   date: timestamp("date").notNull(),
   venue: text("venue").notNull(),
-  fee: integer("fee").default(0).notNull(), // In cents or base currency unit
+  fee: integer("fee").default(0).notNull(),
   deadline: timestamp("deadline").notNull(),
+  appointmentDeadline: timestamp("appointment_deadline"),
   imageUrl: text("image_url"),
 });
 
@@ -59,10 +60,24 @@ export const session = pgTable("session", {
 // Zod Schemas
 export const insertUserSchema = createInsertSchema(users, {
   username: z.string().length(12, "LRN must be exactly 12 digits").regex(/^\d+$/, "LRN must be numbers only"),
-}).omit({ id: true });
+  fullName: z.string().min(1, "Full name is required").transform(val => val.toUpperCase()),
+  section: z.string().min(1, "Section is required").transform(val => val.toUpperCase()),
+  grade: z.string().min(1, "Grade is required"),
+  strand: z.string().optional().default("N/A"),
+}).omit({ id: true }).refine((data) => {
+  const gradeNum = parseInt(data.grade);
+  if (gradeNum >= 11 && (!data.strand || data.strand === "N/A" || data.strand === "")) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Strand is required for Grade 11 and 12",
+  path: ["strand"]
+});
 export const insertEventSchema = createInsertSchema(events, {
   date: z.coerce.date(),
   deadline: z.coerce.date(),
+  appointmentDeadline: z.coerce.date().nullable(),
 }).omit({ id: true });
 export const insertRegistrationSchema = createInsertSchema(registrations).omit({ 
   id: true, 

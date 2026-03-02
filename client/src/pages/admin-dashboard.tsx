@@ -1,10 +1,10 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useEvents, useCreateEvent, useDeleteEvent } from "@/hooks/use-events";
 import { useRegistrations, useUpdateRegistration } from "@/hooks/use-registrations";
-import { Loader2, Plus, Calendar, Users, Filter, Check, X, Search, Upload, Image as ImageIcon, Clock, Trash2 } from "lucide-react";
+import { Loader2, Plus, Calendar, Users, Filter, Check, X, Search, Upload, Image as ImageIcon, Clock, Trash2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +29,9 @@ export default function AdminDashboard() {
   const { mutateAsync: deleteEvent } = useDeleteEvent();
 
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [eventToDelete, setEventToDelete] = useState<number | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("Pending");
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -40,6 +43,7 @@ export default function AdminDashboard() {
        venue: "",
        fee: 0,
        imageUrl: "",
+       appointmentDeadline: null,
     }
   });
 
@@ -70,14 +74,27 @@ export default function AdminDashboard() {
   };
 
   const onSubmitEvent = async (data: z.infer<typeof insertEventSchema>) => {
-    // Standardize to Date objects for validation, though z.coerce.date() in schema handles string inputs too
     await createEvent({
         ...data,
         date: new Date(data.date), 
-        deadline: new Date(data.deadline)
+        deadline: new Date(data.deadline),
+        appointmentDeadline: data.appointmentDeadline ? new Date(data.appointmentDeadline) : null
     });
     setIsEventDialogOpen(false);
     eventForm.reset();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deletePassword === "admin123") {
+      if (eventToDelete) {
+        await deleteEvent(eventToDelete);
+        setIsDeleteDialogOpen(false);
+        setDeletePassword("");
+        setEventToDelete(null);
+      }
+    } else {
+      alert("Incorrect password");
+    }
   };
 
   const pendingRegs = registrations?.filter(r => r.status === "Pending") || [];
@@ -135,8 +152,11 @@ export default function AdminDashboard() {
                             <Input 
                               type="datetime-local" 
                               {...field} 
-                              value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} 
-                              onChange={e => field.onChange(new Date(e.target.value))} 
+                              value={field.value ? new Date(field.value).toLocaleString('sv-SE').slice(0, 16).replace(' ', 'T') : ''} 
+                              onChange={e => {
+                                const val = e.target.value;
+                                field.onChange(val ? new Date(val) : null);
+                              }} 
                               className="rounded-xl pl-10" 
                             />
                           </div>
@@ -164,24 +184,29 @@ export default function AdminDashboard() {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel className="uppercase font-bold text-xs">Fee (PHP)</FormLabel>
-                        <FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} className="rounded-xl" /></FormControl>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-bold">₱</span>
+                            <Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} className="rounded-xl pl-7" />
+                          </div>
+                        </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
                     />
-                     <FormField
+                    <FormField
                     control={eventForm.control}
                     name="deadline"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="uppercase font-bold text-xs">Deadline</FormLabel>
+                        <FormLabel className="uppercase font-bold text-xs">Payment Deadline (Date Only)</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                             <Input 
-                              type="datetime-local" 
+                              type="date" 
                               {...field} 
-                              value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} 
+                              value={field.value ? new Date(field.value).toLocaleString('sv-SE').split(' ')[0] : ''} 
                               onChange={e => {
                                 const val = e.target.value;
                                 field.onChange(val ? new Date(val) : null);
@@ -195,6 +220,31 @@ export default function AdminDashboard() {
                     )}
                     />
                 </div>
+                <FormField
+                  control={eventForm.control}
+                  name="appointmentDeadline"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="uppercase font-bold text-xs">Appointment Deadline (Registration Ends)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                          <Input 
+                            type="datetime-local" 
+                            {...field} 
+                            value={field.value ? new Date(field.value).toLocaleString('sv-SE').slice(0, 16).replace(' ', 'T') : ''} 
+                            onChange={e => {
+                              const val = e.target.value;
+                              field.onChange(val ? new Date(val) : null);
+                            }} 
+                            className="rounded-xl pl-10" 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                     control={eventForm.control}
                     name="imageUrl"
@@ -290,34 +340,25 @@ export default function AdminDashboard() {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-xl font-bold font-display uppercase">Event Management</h3>
+        <h3 className="text-xl font-bold font-display uppercase">Events</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {events?.map(event => (
-            <Card key={event.id} className="overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+            <Card key={event.id} className="overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
+              setEventToDelete(event.id);
+              setIsDeleteDialogOpen(true);
+            }}>
               <div className="h-32 bg-muted relative">
                 {event.imageUrl && <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />}
-                <div className="absolute top-2 right-2">
-                  <Button 
-                    variant="destructive" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full"
-                    onClick={async () => {
-                      if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
-                        await deleteEvent(event.id);
-                      }
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
               </div>
               <CardContent className="p-4">
                 <h4 className="font-bold truncate uppercase">{event.title}</h4>
                 <p className="text-xs text-muted-foreground line-clamp-1 mb-2 uppercase">{event.venue}</p>
                 <div className="flex justify-between items-center mt-2">
-                  <Badge variant="outline" className="text-[10px] uppercase">{format(new Date(event.date), "MMM d, yyyy")}</Badge>
+                  <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight">
+                    {format(new Date(event.date), "MMMM d, yyyy")}
+                  </Badge>
                   <Link href={`/admin/events/${event.id}`}>
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold">Edit</Button>
+                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={(e) => e.stopPropagation()}>Edit</Button>
                   </Link>
                 </div>
               </CardContent>
@@ -325,6 +366,28 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="uppercase">Delete Event</DialogTitle>
+            <DialogDescription className="uppercase font-bold text-red-600">This action cannot be undone. Please enter admin password to confirm.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input 
+              type="password" 
+              placeholder="ENTER ADMIN PASSWORD" 
+              value={deletePassword} 
+              onChange={(e) => setDeletePassword(e.target.value)}
+              className="uppercase rounded-xl"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="uppercase rounded-xl">Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm} className="uppercase rounded-xl shadow-lg shadow-destructive/20">Confirm Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -366,7 +429,7 @@ export default function AdminDashboard() {
                         <div className="text-xs text-muted-foreground uppercase">{reg.user?.grade} - {reg.user?.strand ? `${reg.user?.strand} - ` : ""}{reg.user?.section}</div>
                       </TableCell>
                       <TableCell>{reg.event?.title}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm uppercase">
                         {format(new Date(reg.createdAt), "MMMM d, yyyy")}
                       </TableCell>
                       <TableCell><StatusBadge status={reg.status} /></TableCell>

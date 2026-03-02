@@ -33,7 +33,7 @@ export default function RegistrationDetailsPage() {
 
   const eventData = {
     title: typedReg.event?.title || "N/A",
-    date: typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy h:mm a") : "N/A",
+    date: typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy") : "N/A",
     venue: typedReg.event?.venue || "N/A",
   };
 
@@ -51,6 +51,15 @@ export default function RegistrationDetailsPage() {
          </div>
          <StatusBadge status={typedReg.status} />
       </div>
+
+      {typedReg.remarks && (
+         <Card className="border-primary/50 bg-primary/5 shadow-md border-2">
+            <CardContent className="p-6">
+               <label className="text-xs font-bold uppercase text-primary mb-2 block">Admin Remarks / Feedback</label>
+               <p className="text-lg font-bold text-primary uppercase leading-tight">{typedReg.remarks}</p>
+            </CardContent>
+         </Card>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6">
          <Card>
@@ -184,15 +193,6 @@ export default function RegistrationDetailsPage() {
                      <CheckCircle className="w-4 h-4 mr-2" /> Approve Registration
                   </Button>
                </div>
-            </CardContent>
-         </Card>
-      )}
-
-      {typedReg.remarks && (
-         <Card className="border-border/50 bg-muted/10">
-            <CardContent className="p-4">
-               <label className="text-[10px] font-bold uppercase text-muted-foreground mb-1 block">Admin Remarks</label>
-               <p className="text-sm italic text-muted-foreground uppercase">{typedReg.remarks}</p>
             </CardContent>
          </Card>
       )}
