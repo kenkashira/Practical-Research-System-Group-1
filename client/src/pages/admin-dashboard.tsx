@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useEvents, useCreateEvent } from "@/hooks/use-events";
+import { useEvents, useCreateEvent, useDeleteEvent } from "@/hooks/use-events";
 import { useRegistrations, useUpdateRegistration } from "@/hooks/use-registrations";
-import { Loader2, Plus, Calendar, Users, Filter, Check, X, Search, Upload, Image as ImageIcon } from "lucide-react";
+import { Loader2, Plus, Calendar, Users, Filter, Check, X, Search, Upload, Image as ImageIcon, Clock, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const { data: registrations } = useRegistrations();
   const { mutateAsync: createEvent, isPending: isCreating } = useCreateEvent();
   const { mutateAsync: updateReg } = useUpdateRegistration();
+  const { mutateAsync: deleteEvent } = useDeleteEvent();
 
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("Pending");
@@ -181,7 +182,10 @@ export default function AdminDashboard() {
                               type="datetime-local" 
                               {...field} 
                               value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ''} 
-                              onChange={e => field.onChange(new Date(e.target.value))} 
+                              onChange={e => {
+                                const val = e.target.value;
+                                field.onChange(val ? new Date(val) : null);
+                              }} 
                               className="rounded-xl pl-10" 
                             />
                           </div>
@@ -283,6 +287,43 @@ export default function AdminDashboard() {
              </div>
            </CardContent>
          </Card>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-xl font-bold font-display uppercase">Event Management</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {events?.map(event => (
+            <Card key={event.id} className="overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow">
+              <div className="h-32 bg-muted relative">
+                {event.imageUrl && <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />}
+                <div className="absolute top-2 right-2">
+                  <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    className="h-8 w-8 rounded-full"
+                    onClick={async () => {
+                      if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
+                        await deleteEvent(event.id);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <h4 className="font-bold truncate uppercase">{event.title}</h4>
+                <p className="text-xs text-muted-foreground line-clamp-1 mb-2 uppercase">{event.venue}</p>
+                <div className="flex justify-between items-center mt-2">
+                  <Badge variant="outline" className="text-[10px] uppercase">{format(new Date(event.date), "MMM d, yyyy")}</Badge>
+                  <Link href={`/admin/events/${event.id}`}>
+                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold">Edit</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-4">
