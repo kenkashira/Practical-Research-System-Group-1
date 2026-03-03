@@ -199,14 +199,14 @@ export default function AdminDashboard() {
                     name="deadline"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel className="uppercase font-bold text-xs">Payment Deadline (Date Only)</FormLabel>
+                        <FormLabel className="uppercase font-bold text-xs">Payment Deadline</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                             <Input 
-                              type="date" 
+                              type="datetime-local" 
                               {...field} 
-                              value={field.value ? new Date(field.value).toLocaleString('sv-SE').split(' ')[0] : ''} 
+                              value={field.value ? new Date(field.value).toLocaleString('sv-SE').slice(0, 16).replace(' ', 'T') : ''} 
                               onChange={e => {
                                 const val = e.target.value;
                                 field.onChange(val ? new Date(val) : null);
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
                 <p className="text-xs text-muted-foreground line-clamp-1 mb-2 uppercase">{event.venue}</p>
                 <div className="flex justify-between items-center mt-2">
                   <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight">
-                    {format(new Date(event.date), "MMMM d, yyyy")}
+                    {format(new Date(event.date), "MMMM d, yyyy p")}
                   </Badge>
                   <Link href={`/admin/events/${event.id}`}>
                     <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={(e) => e.stopPropagation()}>Edit</Button>

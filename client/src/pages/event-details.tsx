@@ -139,14 +139,14 @@ export default function EventDetailsPage() {
                 <Calendar className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Date</p>
-                  <p className="font-bold uppercase">{format(new Date(event.date), "MMMM d, yyyy")}</p>
+                  <p className="font-bold uppercase">{format(new Date(event.date), "MMMM d, yyyy p")}</p>
                 </div>
               </div>
               <div className="flex items-start">
                 <Clock className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Payment Deadline</p>
-                  <p className="font-bold uppercase">{format(new Date(event.deadline), "MMMM d, yyyy")}</p>
+                  <p className="font-bold uppercase">{format(new Date(event.deadline), "MMMM d, yyyy p")}</p>
                 </div>
               </div>
               <div className="flex items-start">

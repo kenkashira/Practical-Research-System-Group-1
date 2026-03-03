@@ -99,7 +99,7 @@ export default function StudentDashboard() {
                          REF: <span className="font-mono uppercase">{reg.referenceNumber}</span>
                        </p>
                        <div className="text-xs text-muted-foreground flex items-center justify-between">
-                         <span className="uppercase">Submitted {format(new Date(reg.createdAt), 'MMM d')}</span>
+                         <span className="uppercase">Submitted {format(new Date(reg.createdAt), 'MMMM d, yyyy')}</span>
                          <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1" />
                        </div>
                      </div>

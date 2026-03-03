@@ -36,7 +36,7 @@ export function EventCard({ event, isAdmin }: EventCardProps) {
                 {format(new Date(event.date), "dd")}
              </div>
              <div className="text-sm font-medium uppercase tracking-wider opacity-90 drop-shadow-sm">
-                {format(new Date(event.date), "MMM d, yyyy")}
+                {format(new Date(event.date), "MMMM d, yyyy")}
              </div>
           </div>
         </div>
@@ -52,7 +52,7 @@ export function EventCard({ event, isAdmin }: EventCardProps) {
           <div className="space-y-2 mt-auto">
             <div className="flex items-center text-sm text-muted-foreground">
               <Calendar className="w-4 h-4 mr-2 text-primary" />
-              {format(new Date(event.date), "MMMM d, yyyy h:mm a")}
+              {format(new Date(event.date), "MMMM d, yyyy p")}
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="w-4 h-4 mr-2 text-secondary" />

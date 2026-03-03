@@ -33,7 +33,7 @@ export default function RegistrationDetailsPage() {
 
   const eventData = {
     title: typedReg.event?.title || "N/A",
-    date: typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy") : "N/A",
+    date: typedReg.event?.date ? format(new Date(typedReg.event.date), "MMMM d, yyyy p") : "N/A",
     venue: typedReg.event?.venue || "N/A",
   };
 
@@ -76,8 +76,8 @@ export default function RegistrationDetailsPage() {
                   <p className="font-medium uppercase">{eventData.date}</p>
                </div>
                <div>
-                  <label className="text-xs text-muted-foreground uppercase font-bold">Venue</label>
-                  <p className="font-medium uppercase">{eventData.venue}</p>
+                  <label className="text-xs text-muted-foreground uppercase font-bold">Payment Deadline</label>
+                  <p className="font-medium uppercase">{format(new Date(typedReg.event.deadline), "MMMM d, yyyy p")}</p>
                </div>
             </CardContent>
          </Card>
