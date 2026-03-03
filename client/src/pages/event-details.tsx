@@ -1,4 +1,4 @@
-import { useEvent } from "@/hooks/use-events";
+import { useEvent, useDeleteEvent } from "@/hooks/use-events";
 import { useRegistrations, useCreateRegistration } from "@/hooks/use-registrations";
 import { useAuth } from "@/hooks/use-auth";
 import { useRoute, useLocation, Link } from "wouter";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { InsertRegistration } from "@shared/schema";
@@ -94,6 +95,21 @@ export default function EventDetailsPage() {
   const prevStep = () => setStep(s => s - 1);
 
   const isPastAppointment = event.appointmentDeadline && new Date() > new Date(event.appointmentDeadline);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { mutateAsync: deleteEvent } = useDeleteEvent();
+
+  const handleDeleteConfirm = async () => {
+    if (deletePassword === "admin123") {
+      await deleteEvent(event.id);
+      setLocation("/admin");
+    } else {
+      toast({
+        title: "Incorrect Password",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -180,6 +196,38 @@ export default function EventDetailsPage() {
                 {isStarted ? "Continue Registration" : "Register Now"}
               </Button>
             )}
+            {isAdmin && (
+              <Button 
+                variant="destructive"
+                size="lg" 
+                className="w-full text-lg font-bold shadow-xl shadow-destructive/20 hover:shadow-destructive/30 transition-all uppercase h-14 rounded-2xl"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                Delete Event
+              </Button>
+            )}
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="uppercase">Delete Event</DialogTitle>
+                  <DialogDescription className="uppercase font-bold text-red-600">This action cannot be undone. Please enter admin password to confirm.</DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <Input 
+                    type="password" 
+                    placeholder="ENTER ADMIN PASSWORD" 
+                    value={deletePassword} 
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    className="uppercase rounded-xl"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="uppercase rounded-xl">Cancel</Button>
+                  <Button variant="destructive" onClick={handleDeleteConfirm} className="uppercase rounded-xl shadow-lg shadow-destructive/20">Confirm Delete</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>

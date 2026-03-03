@@ -445,7 +445,7 @@ export default function AdminDashboard() {
                     {format(new Date(event.date), "MMMM d, yyyy p")}
                   </Badge>
                   <Link href={`/admin/events/${event.id}`}>
-                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={(e) => e.stopPropagation()}>Edit</Button>
+                    <Button variant="ghost" size="sm" className="h-7 text-[10px] uppercase font-bold" onClick={(e) => e.stopPropagation()}>Details</Button>
                   </Link>
                 </div>
               </CardContent>
