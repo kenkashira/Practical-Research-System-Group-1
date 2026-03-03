@@ -19,6 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -144,23 +147,51 @@ export default function AdminDashboard() {
                     control={eventForm.control}
                     name="date"
                     render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                         <FormLabel className="uppercase font-bold text-xs">Date & Time</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                            <Input 
-                              type="datetime-local" 
-                              {...field} 
-                              value={field.value ? new Date(field.value).toLocaleString('sv-SE').slice(0, 16).replace(' ', 'T') : ''} 
-                              onChange={e => {
-                                const val = e.target.value;
-                                field.onChange(val ? new Date(val) : null);
-                              }} 
-                              className="rounded-xl pl-10" 
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal rounded-xl",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "MM/dd/yyyy p")
+                                ) : (
+                                  <span>MM/DD/YYYY --:-- --</span>
+                                )}
+                                <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date < new Date("1900-01-01")
+                              }
+                              initialFocus
                             />
-                          </div>
-                        </FormControl>
+                            <div className="p-3 border-t">
+                              <Input 
+                                type="time"
+                                className="rounded-lg"
+                                onChange={(e) => {
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  const date = field.value ? new Date(field.value) : new Date();
+                                  date.setHours(parseInt(hours), parseInt(minutes));
+                                  field.onChange(new Date(date));
+                                }}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -198,23 +229,51 @@ export default function AdminDashboard() {
                     control={eventForm.control}
                     name="deadline"
                     render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col">
                         <FormLabel className="uppercase font-bold text-xs">Payment Deadline</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                            <Input 
-                              type="datetime-local" 
-                              {...field} 
-                              value={field.value ? new Date(field.value).toLocaleString('sv-SE').slice(0, 16).replace(' ', 'T') : ''} 
-                              onChange={e => {
-                                const val = e.target.value;
-                                field.onChange(val ? new Date(val) : null);
-                              }} 
-                              className="rounded-xl pl-10" 
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal rounded-xl",
+                                  !field.value && "text-muted-foreground"
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, "MM/dd/yyyy p")
+                                ) : (
+                                  <span>MM/DD/YYYY --:-- --</span>
+                                )}
+                                <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) =>
+                                date < new Date("1900-01-01")
+                              }
+                              initialFocus
                             />
-                          </div>
-                        </FormControl>
+                            <div className="p-3 border-t">
+                              <Input 
+                                type="time"
+                                className="rounded-lg"
+                                onChange={(e) => {
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  const date = field.value ? new Date(field.value) : new Date();
+                                  date.setHours(parseInt(hours), parseInt(minutes));
+                                  field.onChange(new Date(date));
+                                }}
+                              />
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -224,23 +283,51 @@ export default function AdminDashboard() {
                   control={eventForm.control}
                   name="appointmentDeadline"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase font-bold text-xs">Appointment Deadline (Registration Ends)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-                          <Input 
-                            type="datetime-local" 
-                            {...field} 
-                            value={field.value ? new Date(field.value).toLocaleString('sv-SE').slice(0, 16).replace(' ', 'T') : ''} 
-                            onChange={e => {
-                              const val = e.target.value;
-                              field.onChange(val ? new Date(val) : null);
-                            }} 
-                            className="rounded-xl pl-10" 
+                    <FormItem className="flex flex-col">
+                      <FormLabel className="uppercase font-bold text-xs">Appointment Deadline</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal rounded-xl",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "MM/dd/yyyy p")
+                              ) : (
+                                <span>MM/DD/YYYY --:-- --</span>
+                              )}
+                              <Clock className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value || undefined}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date("1900-01-01")
+                            }
+                            initialFocus
                           />
-                        </div>
-                      </FormControl>
+                          <div className="p-3 border-t">
+                            <Input 
+                              type="time"
+                              className="rounded-lg"
+                              onChange={(e) => {
+                                const [hours, minutes] = e.target.value.split(':');
+                                const date = field.value ? new Date(field.value) : new Date();
+                                date.setHours(parseInt(hours), parseInt(minutes));
+                                field.onChange(new Date(date));
+                              }}
+                            />
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                       <FormMessage />
                     </FormItem>
                   )}
