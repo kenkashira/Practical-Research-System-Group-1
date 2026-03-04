@@ -25,6 +25,8 @@ export default function EventDetailsPage() {
   const { data: registrations } = useRegistrations();
   const { toast } = useToast();
   
+  const isAdmin = user?.role === "admin";
+  
   // Registration Wizard State
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [step, setStep] = useState(1);
