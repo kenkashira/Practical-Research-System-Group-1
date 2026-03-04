@@ -97,5 +97,8 @@ export function useDeleteEvent() {
       queryClient.invalidateQueries({ queryKey: [api.events.list.path] });
       toast({ title: "Deleted", description: "Event removed successfully" });
     },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Error", description: error.message });
+    },
   });
 }

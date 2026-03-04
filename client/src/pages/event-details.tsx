@@ -102,14 +102,18 @@ export default function EventDetailsPage() {
   const { mutateAsync: deleteEvent } = useDeleteEvent();
 
   const handleDeleteConfirm = async () => {
-    if (deletePassword === "admin123") {
-      await deleteEvent(event.id);
-      setLocation("/admin");
-    } else {
-      toast({
-        title: "Incorrect Password",
-        variant: "destructive"
-      });
+    try {
+      if (deletePassword === "admin123") {
+        await deleteEvent(event.id);
+        setLocation("/admin");
+      } else {
+        toast({
+          title: "Incorrect Password",
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
     }
   };
 
