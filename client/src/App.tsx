@@ -64,7 +64,6 @@ function Router() {
         <ProtectedRoute component={EventDetailsPage} />
       </Route>
       <Route path="/registrations">
-        {/* Reuse student dashboard but focused on regs - simplified for now */}
         <ProtectedRoute component={StudentDashboard} />
       </Route>
       <Route path="/registrations/:id">
@@ -77,10 +76,6 @@ function Router() {
       {/* Admin Routes */}
       <Route path="/admin">
         <ProtectedRoute component={AdminDashboard} adminOnly />
-      </Route>
-      <Route path="/admin/events/:id">
-        {/* Admin uses same detail page but might have different actions in future */}
-        <ProtectedRoute component={EventDetailsPage} adminOnly />
       </Route>
       <Route path="/admin/registrations">
         <ProtectedRoute component={AdminDashboard} adminOnly />
