@@ -430,22 +430,21 @@ export default function AdminDashboard() {
         <h3 className="text-xl font-bold font-display uppercase">Events</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {events?.map(event => (
-            <Card key={event.id} className="overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => {
-              setEventToDelete(event.id);
-              setIsDeleteDialogOpen(true);
-            }}>
-              <div className="h-32 bg-muted relative">
-                {event.imageUrl && <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />}
-              </div>
-              <CardContent className="p-4">
-                <h4 className="font-bold truncate uppercase">{event.title}</h4>
-                <p className="text-xs text-muted-foreground line-clamp-1 mb-2 uppercase">{event.venue}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight">
-                    {format(new Date(event.date), "MMMM d, yyyy p")}
-                  </Badge>
+            <Card key={event.id} className="overflow-hidden border border-border/50 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+              <Link href={`/events/${event.id}`}>
+                <div className="h-32 bg-muted relative">
+                  {event.imageUrl && <img src={event.imageUrl} alt="" className="w-full h-full object-cover" />}
                 </div>
-              </CardContent>
+                <CardContent className="p-4">
+                  <h4 className="font-bold truncate uppercase">{event.title}</h4>
+                  <p className="text-xs text-muted-foreground line-clamp-1 mb-2 uppercase">{event.venue}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-tight">
+                      {format(new Date(event.date), "MMMM d, yyyy p")}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Link>
             </Card>
           ))}
         </div>
