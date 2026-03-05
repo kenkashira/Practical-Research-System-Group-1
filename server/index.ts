@@ -4,26 +4,41 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
+const app = express();
+const httpServer = createServer(app);
+
+/* ---------------- FILE UPLOAD SETUP ---------------- */
+
+// Ensure Uploads folder exists
+const uploadDir = path.join(process.cwd(), "Uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
-  }
+  },
 });
 
 export const upload = multer({ storage });
+
+// Serve uploaded files
+app.use("/uploads", express.static(uploadDir));
+
+/* --------------------------------------------------- */
 
 declare module "http" {
   interface IncomingMessage {
     rawBody?: Buffer;
   }
 }
-
-const app = express();
-const httpServer = createServer(app);
 
 app.use(
   express.json({
@@ -50,6 +65,8 @@ export function log(message: string, source = "express") {
   });
   console.log(`${time} [${source}] ${message}`);
 }
+
+/* ---------------- API LOGGER ---------------- */
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
@@ -84,6 +101,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   next();
 });
+
+/* ---------------- SERVER START ---------------- */
 
 (async () => {
   await registerRoutes(httpServer, app);
@@ -123,10 +142,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
       host: "0.0.0.0",
     },
     () => {
-      log(`Server listening on http://0.0.0.0:${PORT}`, "express");
+      log(`Server running on http://localhost:${PORT}`, "express");
     },
   );
 })();
-
-
-
