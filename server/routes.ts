@@ -10,7 +10,14 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { users } from "@shared/schema";
 import pgSession from "connect-pg-simple";
 import { pool } from "./db";
+import { upload } from "./index";
 
+app.post("/upload", upload.single("file"), (req, res) => {
+  res.json({
+    message: "File uploaded",
+    file: req.file
+  });
+});
 // Extend Express User type
 declare global {
   namespace Express {
