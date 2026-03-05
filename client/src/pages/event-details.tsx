@@ -15,71 +15,102 @@ import { ObjectUploader } from "@/components/ObjectUploader";
 import { useUpload } from "@/hooks/use-upload";
 import { cn } from "@/lib/utils";
 
-// This page implements the Registration Wizard
 export default function EventDetailsPage() {
   const [, params] = useRoute("/events/:id");
-  const eventId = parseInt(params?.id || "0");
+  const eventId = parseInt(params?.id || "0", 10);
+
   const { data: event, isLoading } = useEvent(eventId);
   const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const { data: registrations } = useRegistrations();
+  const { data: registrations = [] } = useRegistrations();
   const { toast } = useToast();
-  
-  const isAdmin = user?.role === "admin";
-  
-  // Registration Wizard State
+
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [step, setStep] = useState(1);
   const { mutateAsync: createRegistration, isPending } = useCreateRegistration();
-  const { getUploadParameters } = useUpload(); // Using the hook from context
+  const { getUploadParameters } = useUpload();
 
-  // Form State
   const [parentConsentUrl, setParentConsentUrl] = useState<string | null>(null);
   const [paymentProofUrl, setPaymentProofUrl] = useState<string | null>(null);
 
-  if (isLoading) {
-    return <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-primary" /></div>;
+  const [deletePassword, setDeletePassword] = useState<string>("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const { mutateAsync: deleteEvent } = useDeleteEvent();
+
+  if (!user) {
+    return (
+      <div className="flex h-screen items-center justify-center text-center p-6">
+        <div className="max-w-md">
+          <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
+          <p className="text-muted-foreground mb-6">
+            You need to be logged in to view event details and register.
+          </p>
+          <Button asChild>
+            <Link href="/login">Go to Login</Link>
+          </Button>
+        </div>
+      </div>
+    );
   }
 
-  if (!event) return <div>Event not found</div>;
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="animate-spin w-8 h-8 text-primary" />
+      </div>
+    );
+  }
 
-  const existingRegistration = registrations?.find(r => r.eventId === eventId && r.userId === user?.id);
+  if (!event) {
+    return <div className="text-center p-8 text-muted-foreground">Event not found</div>;
+  }
+
+  const existingRegistration = registrations.find(
+    (r) => r.eventId === eventId && r.userId === user.id
+  );
+
+  const isStarted = !!existingRegistration && existingRegistration.stage < 4;
+  const hasCompleted = !!existingRegistration && existingRegistration.stage === 4;
+
+  const isPastAppointment = event.appointmentDeadline
+    ? new Date() > new Date(event.appointmentDeadline)
+    : false;
 
   const handleRegister = async () => {
     try {
-      if (!user) return;
+      const alreadyRegistered = registrations.some(
+        (r) => r.eventId === eventId && r.userId === user.id && r.stage === 4
+      );
 
-      // Double check for existing registration locally as well
-      const alreadyRegistered = registrations?.some(r => r.eventId === eventId && r.userId === user?.id && r.stage === 4);
       if (alreadyRegistered) {
         toast({
           title: "Already Registered",
           description: "You have already submitted a registration for this event.",
-          variant: "destructive"
+          variant: "destructive",
         });
         setIsWizardOpen(false);
         return;
       }
-      
+
       const payload: InsertRegistration = {
         userId: user.id,
         eventId: event.id,
-        stage: 4, // Completed
+        stage: 4,
         studentInfo: {
-            fullName: user.fullName,
-            grade: user.grade,
-            section: user.section,
-            strand: user.strand,
-            contact: user.contactNumber,
-            email: user.email
+          fullName: user.fullName ?? "",
+          grade: user.grade ?? "",
+          section: user.section ?? "",
+          strand: user.strand ?? "",
+          contact: user.contactNumber ?? "",
+          email: user.email ?? "",
         },
-        parentConsentUrl: parentConsentUrl,
-        paymentProofUrl: paymentProofUrl,
+        parentConsentUrl: parentConsentUrl ?? null,
+        paymentProofUrl: paymentProofUrl ?? null,
       };
 
       await createRegistration(payload);
       setIsWizardOpen(false);
-      
+
       toast({
         title: "Registration Submitted",
         description: "Your registration is now pending review.",
@@ -87,47 +118,55 @@ export default function EventDetailsPage() {
 
       setLocation("/registrations");
     } catch (error) {
-      console.error(error);
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration Failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
     }
   };
-
-  const isStarted = existingRegistration && existingRegistration.stage < 4;
-
-  const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
-
-  const isPastAppointment = event.appointmentDeadline && new Date() > new Date(event.appointmentDeadline);
-  const [deletePassword, setDeletePassword] = useState("");
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const { mutateAsync: deleteEvent } = useDeleteEvent();
 
   const handleDeleteConfirm = async () => {
     try {
       if (deletePassword === "admin123") {
         await deleteEvent(event.id);
+        toast({ title: "Event Deleted" });
         setLocation("/admin");
       } else {
         toast({
           title: "Incorrect Password",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (err) {
       console.error("Delete failed:", err);
+      toast({
+        title: "Delete Failed",
+        description: "An error occurred while deleting the event.",
+        variant: "destructive",
+      });
     }
   };
 
+  const nextStep = () => setStep((s) => s + 1);
+  const prevStep = () => setStep((s) => s - 1);
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <Button variant="ghost" className="pl-0 hover:bg-transparent hover:text-primary mb-4" onClick={() => window.history.back()}>
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 p-4 md:p-0">
+      <Button
+        variant="ghost"
+        className="pl-0 hover:bg-transparent hover:text-primary mb-4"
+        onClick={() => window.history.back()}
+      >
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Events
       </Button>
 
       <div className="bg-white rounded-3xl overflow-hidden shadow-xl border border-border/50">
         <div className="relative h-64 md:h-96">
-          <img 
-            src={event.imageUrl || "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200&auto=format&fit=crop"} 
+          <img
+            src={event.imageUrl || "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=1200&auto=format&fit=crop"}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -138,10 +177,14 @@ export default function EventDetailsPage() {
               {event.fee === 0 ? (
                 <Badge variant="secondary" className="text-secondary-foreground font-bold uppercase">Free</Badge>
               ) : (
-                <Badge variant="secondary" className="text-secondary-foreground font-bold uppercase">PHP {event.fee}</Badge>
+                <Badge variant="secondary" className="text-secondary-foreground font-bold uppercase">
+                  PHP {event.fee}
+                </Badge>
               )}
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold mb-2 shadow-sm uppercase">{event.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-display font-bold mb-2 shadow-sm uppercase">
+              {event.title}
+            </h1>
           </div>
         </div>
 
@@ -161,14 +204,18 @@ export default function EventDetailsPage() {
                 <Calendar className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Date</p>
-                  <p className="font-bold uppercase">{format(new Date(event.date), "MMMM d, yyyy p")}</p>
+                  <p className="font-bold uppercase">
+                    {format(new Date(event.date), "MMMM d, yyyy p")}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start">
                 <Clock className="w-5 h-5 mr-3 text-primary mt-0.5" />
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Payment Deadline</p>
-                  <p className="font-bold uppercase">{format(new Date(event.deadline), "MMMM d, yyyy p")}</p>
+                  <p className="font-bold uppercase">
+                    {format(new Date(event.deadline), "MMMM d, yyyy p")}
+                  </p>
                 </div>
               </div>
               <div className="flex items-start">
@@ -180,13 +227,15 @@ export default function EventDetailsPage() {
               </div>
             </div>
 
-            {existingRegistration && existingRegistration.stage === 4 ? (
+            {hasCompleted ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-                 <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                 <p className="text-green-800 font-bold uppercase text-sm">You are registered!</p>
-                 <Link href={`/registrations/${existingRegistration.id}`}>
-                    <Button variant="outline" className="text-green-700 mt-2 uppercase font-bold text-xs">View Status</Button>
-                 </Link>
+                <CheckCircle2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <p className="text-green-800 font-bold uppercase text-sm">You are registered!</p>
+                <Link href={`/registrations/${existingRegistration?.id}`}>
+                  <Button variant="outline" className="text-green-700 mt-2 uppercase font-bold text-xs">
+                    View Status
+                  </Button>
+                </Link>
               </div>
             ) : isPastAppointment ? (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
@@ -194,18 +243,19 @@ export default function EventDetailsPage() {
                 <p className="text-red-800 font-bold uppercase text-xs">Registration Period Ended</p>
               </div>
             ) : (
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="w-full text-lg font-bold shadow-xl shadow-primary/20 hover:shadow-primary/30 transition-all uppercase h-14 rounded-2xl"
                 onClick={() => setIsWizardOpen(true)}
               >
                 {isStarted ? "Continue Registration" : "Register Now"}
               </Button>
             )}
-            {isAdmin && (
-              <Button 
+
+            {user.role === "admin" && (
+              <Button
                 variant="destructive"
-                size="lg" 
+                size="lg"
                 className="w-full text-lg font-bold shadow-xl shadow-destructive/20 hover:shadow-destructive/30 transition-all uppercase h-14 rounded-2xl"
                 onClick={() => setIsDeleteDialogOpen(true)}
               >
@@ -217,20 +267,34 @@ export default function EventDetailsPage() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="uppercase">Delete Event</DialogTitle>
-                  <DialogDescription className="uppercase font-bold text-red-600">This action cannot be undone. Please enter admin password to confirm.</DialogDescription>
+                  <DialogDescription className="uppercase font-bold text-red-600">
+                    This action cannot be undone. Please enter admin password to confirm.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                  <Input 
-                    type="password" 
-                    placeholder="ENTER ADMIN PASSWORD" 
-                    value={deletePassword} 
+                  <Input
+                    type="password"
+                    placeholder="ENTER ADMIN PASSWORD"
+                    value={deletePassword}
                     onChange={(e) => setDeletePassword(e.target.value)}
                     className="uppercase rounded-xl"
                   />
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="uppercase rounded-xl">Cancel</Button>
-                  <Button variant="destructive" onClick={handleDeleteConfirm} className="uppercase rounded-xl shadow-lg shadow-destructive/20">Confirm Delete</Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                    className="uppercase rounded-xl"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDeleteConfirm}
+                    className="uppercase rounded-xl shadow-lg shadow-destructive/20"
+                  >
+                    Confirm Delete
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -242,222 +306,290 @@ export default function EventDetailsPage() {
       <Dialog open={isWizardOpen} onOpenChange={setIsWizardOpen}>
         <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-card">
           <DialogHeader className="p-6 pb-2">
-             <DialogTitle className="font-display text-2xl uppercase">Event Registration</DialogTitle>
-             <div className="flex items-center gap-1 mt-2 mb-4">
-                {[1, 2, 3, 4].map((i) => {
-                  const totalSteps = event.fee > 0 ? 4 : 3;
-                  if (i > totalSteps) return null;
-                  const isActive = step >= i;
-                  return (
-                    <div key={i} className="flex-1 flex items-center gap-1">
-                      <div className={cn(
+            <DialogTitle className="font-display text-2xl uppercase">Event Registration</DialogTitle>
+            <div className="flex items-center gap-1 mt-2 mb-4">
+              {[1, 2, 3, 4].map((i) => {
+                const totalSteps = event.fee > 0 ? 4 : 3;
+                if (i > totalSteps) return null;
+                const isActive = step >= i;
+                return (
+                  <div key={i} className="flex-1 flex items-center gap-1">
+                    <div
+                      className={cn(
                         "h-1.5 flex-1 rounded-full transition-all duration-300",
                         isActive ? "bg-primary" : "bg-muted"
-                      )} />
-                    </div>
-                  );
-                })}
-             </div>
-             <DialogDescription className="uppercase font-bold text-xs text-primary">
-               Step {step} of {event.fee > 0 ? 4 : 3}: {
-                 step === 1 ? "Student Information" :
-                 step === 2 ? "Parent Consent" :
-                 step === 3 && event.fee > 0 ? "Payment Submission" : "Final Review"
-               }
-             </DialogDescription>
+                      )}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <DialogDescription className="uppercase font-bold text-xs text-primary">
+              Step {step} of {event.fee > 0 ? 4 : 3}:{" "}
+              {step === 1
+                ? "Student Information"
+                : step === 2
+                ? "Parent Consent"
+                : step === 3 && event.fee > 0
+                ? "Payment Submission"
+                : "Final Review"}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="p-6 pt-2">
             {step === 1 && (
-               <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Full Name</label>
-                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.fullName}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Student ID / LRN</label>
-                      <div className="p-2.5 bg-muted rounded-lg text-sm font-mono opacity-70 border border-border/50">{user?.username}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Grade</label>
-                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.grade}</div>
-                    </div>
-                    {user?.strand && user?.strand !== "N/A" && (
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase text-muted-foreground">Strand</label>
-                        <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.strand}</div>
-                      </div>
-                    )}
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Section</label>
-                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">{user?.section}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Email Address</label>
-                      <div className="p-2.5 bg-white rounded-lg text-sm font-medium border border-border/50 flex items-center gap-2">
-                        <Mail className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="truncate">{user?.email}</span>
-                      </div>
+              <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Full Name</label>
+                    <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">
+                      {user?.fullName ?? "—"}
                     </div>
                   </div>
-                 <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex items-start gap-3">
-                    <div className="p-1.5 bg-white rounded-md text-primary shadow-sm">
-                      <User className="w-3.5 h-3.5" />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Student ID / LRN</label>
+                    <div className="p-2.5 bg-muted rounded-lg text-sm font-mono opacity-70 border border-border/50">
+                      {user?.username ?? "—"}
                     </div>
-                    <p className="text-[11px] text-muted-foreground leading-tight uppercase font-medium">
-                      Information is pulled from your profile. Update it in <Link href="/settings" className="text-primary hover:underline font-bold">Settings</Link> if incorrect.
-                    </p>
-                 </div>
-               </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Grade</label>
+                    <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">
+                      {user?.grade ?? "—"}
+                    </div>
+                  </div>
+                  {user?.strand && user?.strand !== "N/A" && (
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase text-muted-foreground">Strand</label>
+                      <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">
+                        {user?.strand}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Section</label>
+                    <div className="p-2.5 bg-muted rounded-lg text-sm font-medium opacity-70 border border-border/50 uppercase">
+                      {user?.section ?? "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Email Address</label>
+                    <div className="p-2.5 bg-white rounded-lg text-sm font-medium border border-border/50 flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="truncate">{user?.email ?? "—"}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex items-start gap-3">
+                  <div className="p-1.5 bg-white rounded-md text-primary shadow-sm">
+                    <User className="w-3.5 h-3.5" />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-tight uppercase font-medium">
+                    Information is pulled from your profile. Update it in{" "}
+                    <Link href="/settings" className="text-primary hover:underline font-bold">
+                      Settings
+                    </Link>{" "}
+                    if incorrect.
+                  </p>
+                </div>
+              </div>
             )}
 
             {step === 2 && (
-                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
-                   <div className="text-center space-y-2 mb-4">
-                     <h4 className="font-bold uppercase text-sm">Upload Consent Form</h4>
-                     <p className="text-xs text-muted-foreground uppercase">Please upload a photo of your signed parental consent form.</p>
-                   </div>
-                   <div className="border-2 border-dashed border-border rounded-2xl p-8 hover:bg-muted/10 transition-colors">
-                      <ObjectUploader 
-                        onGetUploadParameters={getUploadParameters}
-                        onComplete={(result) => {
-                          const url = result.successful?.[0]?.uploadURL; 
-                          if (url) setParentConsentUrl(url); 
-                        }}
-                      >
-                         <div className="flex flex-col items-center gap-3 cursor-pointer">
-                           {parentConsentUrl ? (
-                             <div className="relative group">
-                               <img src={parentConsentUrl} className="w-32 h-32 object-cover rounded-xl border border-border" alt="Preview" />
-                               <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                 <p className="text-[10px] text-white font-bold uppercase">Change Image</p>
-                               </div>
-                             </div>
-                           ) : (
-                             <>
-                               <div className="bg-primary/10 p-4 rounded-full text-primary">
-                                 <FileUp className="w-6 h-6" />
-                               </div>
-                               <p className="font-bold text-sm uppercase">Tap to Upload Form</p>
-                             </>
-                           )}
-                         </div>
-                      </ObjectUploader>
-                   </div>
-                   {parentConsentUrl && (
-                     <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
-                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                       <span className="text-[11px] text-green-700 font-bold uppercase">Form successfully attached</span>
-                     </div>
-                   )}
+              <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                <div className="text-center space-y-2 mb-4">
+                  <h4 className="font-bold uppercase text-sm">Upload Consent Form</h4>
+                  <p className="text-xs text-muted-foreground uppercase">
+                    Please upload a photo of your signed parental consent form.
+                  </p>
                 </div>
+                <div className="border-2 border-dashed border-border rounded-2xl p-8 hover:bg-muted/10 transition-colors">
+                  <ObjectUploader
+                    onGetUploadParameters={getUploadParameters}
+                    onComplete={(result) => {
+                      if (result.failed?.length) {
+                        toast({
+                          title: "Upload Failed",
+                          description: result.failed[0].error?.message || "Unknown error",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      const url = result.successful?.[0]?.uploadURL;
+                      if (url) setParentConsentUrl(url);
+                    }}
+                  >
+                    <div className="flex flex-col items-center gap-3 cursor-pointer">
+                      {parentConsentUrl ? (
+                        <div className="relative group">
+                          <img
+                            src={parentConsentUrl}
+                            className="w-32 h-32 object-cover rounded-xl border border-border"
+                            alt="Preview"
+                          />
+                          <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <p className="text-[10px] text-white font-bold uppercase">Change Image</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="bg-primary/10 p-4 rounded-full text-primary">
+                            <FileUp className="w-6 h-6" />
+                          </div>
+                          <p className="font-bold text-sm uppercase">Tap to Upload Form</p>
+                        </>
+                      )}
+                    </div>
+                  </ObjectUploader>
+                </div>
+                {parentConsentUrl && (
+                  <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="text-[11px] text-green-700 font-bold uppercase">Form successfully attached</span>
+                  </div>
+                )}
+              </div>
             )}
 
             {step === 3 && event.fee > 0 && (
-                <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
-                   <div className="bg-secondary/10 p-4 rounded-xl border border-secondary/20 text-center space-y-1">
-                     <p className="text-xs text-muted-foreground uppercase">Amount to Pay</p>
-                     <p className="text-2xl font-display font-bold text-secondary-foreground">PHP {event.fee}</p>
-                     <p className="text-[10px] text-muted-foreground uppercase mt-2">GCash: 0912 345 6789 (Army's Angels)</p>
-                   </div>
-                   
-                   <div className="border-2 border-dashed border-border rounded-2xl p-8 hover:bg-muted/10 transition-colors">
-                      <ObjectUploader 
-                        onGetUploadParameters={getUploadParameters}
-                        onComplete={(result) => {
-                          const url = result.successful?.[0]?.uploadURL; 
-                          if (url) setPaymentProofUrl(url); 
-                        }}
-                      >
-                         <div className="flex flex-col items-center gap-3 cursor-pointer">
-                           {paymentProofUrl ? (
-                             <div className="relative group">
-                               <img src={paymentProofUrl} className="w-32 h-32 object-cover rounded-xl border border-border" alt="Preview" />
-                               <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                 <p className="text-[10px] text-white font-bold uppercase">Change Image</p>
-                               </div>
-                             </div>
-                           ) : (
-                             <>
-                               <div className="bg-secondary/10 p-4 rounded-full text-secondary-foreground">
-                                 <FileUp className="w-6 h-6" />
-                               </div>
-                               <p className="font-bold text-sm uppercase">Upload Payment Receipt</p>
-                             </>
-                           )}
-                         </div>
-                      </ObjectUploader>
-                   </div>
-                   {paymentProofUrl && (
-                     <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
-                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                       <span className="text-[11px] text-green-700 font-bold uppercase">Receipt successfully attached</span>
-                     </div>
-                   )}
+              <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                <div className="bg-secondary/10 p-4 rounded-xl border border-secondary/20 text-center space-y-1">
+                  <p className="text-xs text-muted-foreground uppercase">Amount to Pay</p>
+                  <p className="text-2xl font-display font-bold text-secondary-foreground">PHP {event.fee}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase mt-2">
+                    GCash: 0912 345 6789 (Army's Angels)
+                  </p>
                 </div>
+
+                <div className="border-2 border-dashed border-border rounded-2xl p-8 hover:bg-muted/10 transition-colors">
+                  <ObjectUploader
+                    onGetUploadParameters={getUploadParameters}
+                    onComplete={(result) => {
+                      if (result.failed?.length) {
+                        toast({
+                          title: "Upload Failed",
+                          description: result.failed[0].error?.message || "Unknown error",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      const url = result.successful?.[0]?.uploadURL;
+                      if (url) setPaymentProofUrl(url);
+                    }}
+                  >
+                    <div className="flex flex-col items-center gap-3 cursor-pointer">
+                      {paymentProofUrl ? (
+                        <div className="relative group">
+                          <img
+                            src={paymentProofUrl}
+                            className="w-32 h-32 object-cover rounded-xl border border-border"
+                            alt="Preview"
+                          />
+                          <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <p className="text-[10px] text-white font-bold uppercase">Change Image</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="bg-secondary/10 p-4 rounded-full text-secondary-foreground">
+                            <FileUp className="w-6 h-6" />
+                          </div>
+                          <p className="font-bold text-sm uppercase">Upload Payment Receipt</p>
+                        </>
+                      )}
+                    </div>
+                  </ObjectUploader>
+                </div>
+                {paymentProofUrl && (
+                  <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="text-[11px] text-green-700 font-bold uppercase">Receipt successfully attached</span>
+                  </div>
+                )}
+              </div>
             )}
 
             {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) && (
-               <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
-                 <div className="bg-muted/30 rounded-2xl border border-border/50 overflow-hidden">
-                    <div className="p-4 bg-muted/50 border-b border-border/50">
-                      <h4 className="font-bold uppercase text-xs">Registration Summary</h4>
+              <div className="space-y-4 animate-in slide-in-from-right-8 duration-300">
+                <div className="bg-muted/30 rounded-2xl border border-border/50 overflow-hidden">
+                  <div className="p-4 bg-muted/50 border-b border-border/50">
+                    <h4 className="font-bold uppercase text-xs">Registration Summary</h4>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground uppercase font-medium">Event</span>
+                      <span className="font-bold uppercase">{event.title}</span>
                     </div>
-                    <div className="p-4 space-y-3">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground uppercase font-medium">Event</span>
-                        <span className="font-bold uppercase">{event.title}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground uppercase font-medium">Student</span>
-                        <span className="font-bold uppercase">{user?.fullName}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground uppercase font-medium">Consent Form</span>
-                        <Badge variant="outline" className="text-[9px] bg-green-50 text-green-700 border-green-100 uppercase">Attached</Badge>
-                      </div>
-                      {event.fee > 0 && (
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-muted-foreground uppercase font-medium">Payment Proof</span>
-                          <Badge variant="outline" className="text-[9px] bg-green-50 text-green-700 border-green-100 uppercase">Attached</Badge>
-                        </div>
-                      )}
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground uppercase font-medium">Student</span>
+                      <span className="font-bold uppercase">{user?.fullName ?? "—"}</span>
                     </div>
-                 </div>
-                 
-                 <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex gap-4">
-                    <ShieldCheck className="w-6 h-6 text-amber-600 shrink-0" />
-                    <div>
-                      <h4 className="text-amber-900 font-bold uppercase text-xs mb-1">Confirmation</h4>
-                      <p className="text-amber-800 text-[10px] uppercase leading-tight">
-                        By submitting, you agree that all information provided is accurate and true. 
-                        Your registration will be reviewed by the school administration.
-                      </p>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground uppercase font-medium">Consent Form</span>
+                      <Badge variant="outline" className="text-[9px] bg-green-50 text-green-700 border-green-100 uppercase">
+                        Attached
+                      </Badge>
                     </div>
-                 </div>
-               </div>
+                    {event.fee > 0 && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground uppercase font-medium">Payment Proof</span>
+                        <Badge variant="outline" className="text-[9px] bg-green-50 text-green-700 border-green-100 uppercase">
+                          Attached
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex gap-4">
+                  <ShieldCheck className="w-6 h-6 text-amber-600 shrink-0" />
+                  <div>
+                    <h4 className="text-amber-900 font-bold uppercase text-xs mb-1">Confirmation</h4>
+                    <p className="text-amber-800 text-[10px] uppercase leading-tight">
+                      By submitting, you agree that all information provided is accurate and true.
+                      Your registration will be reviewed by the school administration.
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
-           <DialogFooter className="p-6 bg-muted/20 flex gap-2 justify-between sm:justify-between">
-             <Button variant="outline" onClick={prevStep} disabled={step === 1} className="uppercase">
-               Back
-             </Button>
-             
-              {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) ? (
-                <Button onClick={handleRegister} disabled={isPending} className="bg-green-600 hover:bg-green-700 text-white uppercase min-w-[140px]">
-                  {isPending ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : "Final Submit"}
-                </Button>
-             ) : (
-                <Button onClick={nextStep} disabled={
-                    (step === 2 && !parentConsentUrl) || 
-                    (step === 3 && event.fee > 0 && !paymentProofUrl)
-                } className="uppercase min-w-[140px]">
-                  Next Step
-                </Button>
-             )}
-           </DialogFooter>
+          <DialogFooter className="p-6 bg-muted/20 flex gap-2 justify-between sm:justify-between">
+            <Button
+              variant="outline"
+              onClick={prevStep}
+              disabled={step === 1}
+              className="uppercase"
+            >
+              Back
+            </Button>
+
+            {((step === 4 && event.fee > 0) || (step === 3 && event.fee === 0)) ? (
+              <Button
+                onClick={handleRegister}
+                disabled={isPending}
+                className="bg-green-600 hover:bg-green-700 text-white uppercase min-w-[140px]"
+              >
+                {isPending ? (
+                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                ) : (
+                  "Final Submit"
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={nextStep}
+                disabled={
+                  (step === 2 && !parentConsentUrl) ||
+                  (step === 3 && event.fee > 0 && !paymentProofUrl)
+                }
+                className="uppercase min-w-[140px]"
+              >
+                Next Step
+              </Button>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
