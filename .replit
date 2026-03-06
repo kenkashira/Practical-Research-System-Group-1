@@ -41,3 +41,12 @@ waitForPort = 5000
 
 [agent]
 integrations = ["javascript_object_storage:2.0.0"]
+
+[userenv]
+
+[userenv.shared]
+VITE_SUPABASE_URL = "https://rqpbpsgwjfwdqniyyigf.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcGJwc2d3amZ3ZHFuaXl5aWdmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NjU0NTIsImV4cCI6MjA4ODI0MTQ1Mn0.R_tXJHIDSS_57Ijaorif4_KPaDoeP5a8geyM8tEVdIw"
+
+[objectStorage]
+defaultBucketID = "replit-objstore-072d0f2e-b732-433c-8d8b-3951351fb32f"
