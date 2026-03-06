@@ -39,6 +39,15 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "aa"
+mode = "sequential"
+author = 53555060
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install mutler"
+
 [agent]
 integrations = ["javascript_object_storage:2.0.0"]
 
