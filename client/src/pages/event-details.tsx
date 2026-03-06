@@ -38,7 +38,6 @@ import { useUpload } from "@/hooks/use-upload";
 import { cn } from "@/lib/utils";
 
 export default function EventDetailsPage() {
-  // ── ALL HOOKS FIRST ── (must be unconditional and in same order every render)
   const [, params] = useRoute("/events/:id");
   const eventId = parseInt(params?.id || "0", 10);
 
@@ -61,7 +60,6 @@ export default function EventDetailsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
   const { mutateAsync: deleteEvent } = useDeleteEvent();
 
-  // ── Conditional rendering AFTER all hooks ──
   if (!user) {
     return (
       <div className="flex h-screen items-center justify-center text-center p-6">
@@ -94,13 +92,14 @@ export default function EventDetailsPage() {
     );
   }
 
-  // ── Rest of the logic ──
   const existingRegistration = registrations.find(
     (r) => r.eventId === eventId && r.userId === user.id,
   );
+
   const isStarted = !!existingRegistration && existingRegistration.stage < 4;
   const hasCompleted =
     !!existingRegistration && existingRegistration.stage === 4;
+
   const isPastAppointment = event.appointmentDeadline
     ? new Date() > new Date(event.appointmentDeadline)
     : false;
@@ -110,6 +109,7 @@ export default function EventDetailsPage() {
       const alreadyRegistered = registrations.some(
         (r) => r.eventId === eventId && r.userId === user.id && r.stage === 4,
       );
+
       if (alreadyRegistered) {
         toast({
           title: "Already Registered",
@@ -139,10 +139,12 @@ export default function EventDetailsPage() {
 
       await createRegistration(payload);
       setIsWizardOpen(false);
+
       toast({
         title: "Registration Submitted",
         description: "Your registration is now pending review.",
       });
+
       setLocation("/registrations");
     } catch (error) {
       console.error("Registration error:", error);
@@ -453,7 +455,6 @@ export default function EventDetailsPage() {
                     </div>
                   </div>
                 </div>
-
                 <div className="bg-primary/5 p-3 rounded-lg border border-primary/10 flex items-start gap-3">
                   <div className="p-1.5 bg-white rounded-md text-primary shadow-sm">
                     <User className="w-3.5 h-3.5" />
@@ -526,7 +527,6 @@ export default function EventDetailsPage() {
                     </div>
                   </ObjectUploader>
                 </div>
-
                 {parentConsentUrl && (
                   <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
                     <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -596,7 +596,6 @@ export default function EventDetailsPage() {
                     </div>
                   </ObjectUploader>
                 </div>
-
                 {paymentProofUrl && (
                   <div className="bg-green-50 p-2.5 rounded-lg border border-green-100 flex items-center gap-2 justify-center">
                     <CheckCircle2 className="w-4 h-4 text-green-600" />
